@@ -8,6 +8,7 @@ real*8                              :: pi
 integer                             :: i, j, k, l, num_points
 logical                             :: cond1, cond2
 
+! INITIAL DEFINITIONS
 pi = 4.d0*atan(1.d0)
 
 num_points      = 4000000
@@ -15,24 +16,28 @@ lat_separation  = 10.d0
 lat_const       = 2.42d0
 rot_angle       = (1.08445d0/180.d0) * pi
 
+! ALLOCATE THE TWO LATTICES
 allocate(lat1(num_points, 3))
 allocate(lat2(num_points, 3))
 lat1 = 0.d0
 lat2 = 0.d0
 
-call create_lattice_eh(lat1, 0.d0          , lat_const, 2000)
-call create_lattice_eh(lat2, lat_separation, lat_const, 2000)
+! GENERATE THE LATTICE POINTS
+call create_lattice_bch(lat1, 0.d0          , lat_const, 2000)
+call create_lattice_bch(lat2, lat_separation, lat_const, 2000)
 
+! ROTATE SECOND LATTICE
+do i=1, num_points
+    lat2(i,:) = rotate_point(lat2(i,:), [0.d0, 0.d0, lat_separation], rot_angle)
+enddo
+
+! TRIM THE LATTICES (ONLY USE WHAT HAS -50 < x < 50 AND y > 0) FOR PERFORMANCE
 allocate(lat1_aux(num_points,3))
 allocate(lat2_aux(num_points,3))
 lat1_aux = 0.d0
 lat2_aux = 0.d0
 j = 0
 k = 0
-do i=1, num_points
-    lat2(i,:) = rotate_point(lat2(i,:), [0.d0, 0.d0, lat_separation], rot_angle)
-enddo
-
 do i=1, num_points
     cond1 = (lat1(i,1) > -50.d0) .and. (lat1(i,1) < 50.d0) .and. (lat1(i,2) >= 0.d0)
     cond2 = (lat2(i,1) > -50.d0) .and. (lat2(i,1) < 50.d0) .and. (lat2(i,2) >= 0.d0)
@@ -46,28 +51,34 @@ do i=1, num_points
     endif
 enddo
 
+! STORE TRIMMED LATTICES IN SMALLER ARRAYS
 allocate(lat1f(j,3))
 allocate(lat2f(k,3))
 lat1f = lat1_aux(1:j,:)
 lat2f = lat2_aux(1:k,:)
 
+! WRITE THEM TO FILES
 call write_lattice(lat1f, "lattice01.dat")
 call write_lattice(lat2f, "lattice02.dat")
 
+! GENERATE THIRD LATTICE TO STORE WHICH POINTS OF THE FIRST ONE
+! ARE EXACTLY BELOW A POINT FROM THE SECOND ONE
 allocate(lat3_aux(num_points,3))
 lat3_aux = 0.d0
 l = 0
 do i=1, min(j,k)
-    if (exists_in_lattice([lat2f(i,1), lat2f(i,2), 0.d0], lat1f(i-1000:i+1000,:))) then
+    if (exists_in_lattice([lat2f(i,1), lat2f(i,2), 0.d0], lat1f(i-2000:i+2000,:))) then
         l = l + 1
         lat3_aux(l,:) = lat2f(i,:)
     endif
 enddo
 
+! ALLOCATE ARRAY OF THE RIGHT SIZE TO STORE THIRD LATTICE AND WRITE
 allocate(lat3(l,3))
 lat3 = lat3_aux(1:l,:)
 call write_lattice(lat3, "lattice03.dat")
 
+! DEALLOCATE EVERYTHING
 deallocate(lat1)
 deallocate(lat2)
 deallocate(lat3)
@@ -89,7 +100,7 @@ function exists_in_lattice(point, lattice) result(flag)
 
     allocate(condition_list(size(lattice,1)))
 
-    tol = 1e-8
+    tol = 1e-2
     do i=1, size(lattice, 1)
         c1 = abs(lattice(i,1) - point(1))
         c2 = abs(lattice(i,2) - point(2))
@@ -97,11 +108,11 @@ function exists_in_lattice(point, lattice) result(flag)
         condition_list(i) = (c1 < tol) .and. (c2 < tol) .and. (c3 < tol)
     enddo
 
-    cont = count(condition_list .eqv. .true.)
     flag = any(condition_list .eqv. .true.)
 end function
 
-subroutine create_lattice_bch(lattice, z, a, num_columns) ! body-centered hexagon
+! CREATES LATTICE OF BODY-CENTERED HEXAGONS
+subroutine create_lattice_bch(lattice, z, a, num_columns)
     real*8, dimension(:,:), intent(inout) :: lattice
     real*8, intent(in)                    :: z, a
     real*8, dimension(3)                  :: v1, v2, origin_gen, lat_origin
@@ -138,7 +149,8 @@ subroutine create_lattice_bch(lattice, z, a, num_columns) ! body-centered hexago
     lattice(:,3) = lattice(:,3) - lat_origin(3)
 end subroutine
 
-subroutine create_lattice_eh(lattice, z, a, num_columns) ! empty hexagon
+! CREATES LATTICE OF EMPTY HEXAGONS (HONEYCOMB)
+subroutine create_lattice_eh(lattice, z, a, num_columns)
     real*8, dimension(:,:), intent(inout) :: lattice
     real*8, intent(in)                    :: z, a
     real*8, dimension(3)                  :: v1, v2, v3, v4, origin_a, origin_b, lat_origin
