@@ -14,7 +14,7 @@ function exists_in_lattice(point, lattice) result(flag)
     logical, dimension(:), allocatable    :: condition_list
     integer                               :: i
 
-    tol = 1.e-3_16
+    tol = 1.e-8_16
     !flag = any(all(abs(spread(point, dim=1, ncopies=size(lattice,1)) - lattice) .lt. tol, dim=2))
 
     allocate(condition_list(size(lattice,1)))
@@ -92,7 +92,7 @@ subroutine create_lattice_eh(lattice, z, a)
     lattice(2,:) = origin_b
     i = 3
     do while(i < size(lattice,1)-1)
-        do j=1, num_columns
+        do j=1, num_columns/2
             if (i >= size(lattice,1)-1) then
                 exit
             endif
