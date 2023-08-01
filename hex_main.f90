@@ -9,19 +9,20 @@ integer                              :: i, j, n_points, max_ind, min_ind
 logical                              :: cond3
 
 n_points = 100000
-angle = 0.0549718924e0_16
-!angle = 0.3802512067e0_16
-z = 2.e0_16
-a = 2.42e0_16
+angle = magic_angle(40)
+write(*,*) "angle in radians: ", angle
+write(*,*) "angle in degrees: ", (angle*180.e0_16)/pi
+z = 3.35e0_16
+a = 2.46e0_16
 
 ! ALLOCATE AND CREATE LATTICES
 allocate(lat1(n_points,3))
 allocate(lat2(n_points,3))
-call create_lattice_eh(lat1, 0.e0_16, a)
-call create_lattice_eh(lat2, z      , a)
+call create_lattice_eh(lat1, 0.e0_16, a, .false.)
+call create_lattice_eh(lat2, z      , a, .true.)
 
 ! ROTATE LATTICE 2
-call rotate_lattice(lat2, angle) 
+call rotate_lattice(lat2, angle)
 
 ! TRIM THE LATTICE 1
 allocate(lat1_aux(n_points, 3))
@@ -44,7 +45,7 @@ deallocate(lat2)
 ! FIND POINTS FROM LAT2 WHERE THERE'S A LAT1 POINT RIGHT ABOVE/BELOW
 allocate(lat3_aux(n_points,3))
 j = 0
-max_ind = 10000
+max_ind = 5000
 min_ind = 0
 do i=1, size(lat2f,1)
     cond3 = exists_in_lattice([lat2f(i,1), lat2f(i,2), 0.e0_16], lat1f(i-min_ind:i+max_ind,:))
@@ -53,10 +54,10 @@ do i=1, size(lat2f,1)
         lat3_aux(j,:) = lat2f(i,:)
     endif
     
-    if (i < 10000) then
+    if (i < 5000) then
         min_ind = min_ind + 1
     else
-        if (i > n_points - 10000) then
+        if (i > n_points - 5000) then
             max_ind = max_ind - 1
         endif
     endif

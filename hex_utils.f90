@@ -67,14 +67,15 @@ subroutine create_lattice_bch(lattice, z, a)
 end subroutine
 
 ! CREATES LATTICE OF EMPTY HEXAGONS (HONEYCOMB)
-subroutine create_lattice_eh(lattice, z, a)
+subroutine create_lattice_eh(lattice, z, a, ab_stacking)
     real*16, dimension(:,:), intent(inout) :: lattice
     real*16, intent(in)                    :: z, a
     real*16, dimension(3)                  :: v1, v2, v3, d1, origin_a, origin_b, lat_origin
     real*16                                :: angle, d
     integer                                :: i, j, num_columns, row, i0
+    logical, intent(in)                    :: ab_stacking
 
-    num_columns = int(sqrt(real(size(lattice,1),16)))
+    num_columns = 2*int(sqrt(real(size(lattice,1),16)))/3
     angle = (60.e0_16/180.e0_16) * pi
 
     v1 = [a, 0.e0_16, 0.e0_16]
@@ -92,7 +93,7 @@ subroutine create_lattice_eh(lattice, z, a)
     lattice(2,:) = origin_b
     i = 3
     do while(i < size(lattice,1)-1)
-        do j=1, num_columns/2
+        do j=1, num_columns
             if (i >= size(lattice,1)-1) then
                 exit
             endif
@@ -113,11 +114,17 @@ subroutine create_lattice_eh(lattice, z, a)
     lattice(1,:) = [0.e0_16, 0.e0_16, z]
     lattice(2,:) = [d*cos(angle/2.e0_16), d*sin(angle/2.e0_16), z]
 
-    i0 = ((row/2) * num_columns) + (num_columns/2)
+    i0 = (row * num_columns) + (num_columns)
     lat_origin = lattice(i0,:)
     lattice(:,1) = lattice(:,1) - lat_origin(1)
     lattice(:,2) = lattice(:,2) - lat_origin(2)
     lattice(:,3) = lattice(:,3) - lat_origin(3)
+
+    if (ab_stacking) then
+        lattice(:,1) = lattice(:,1) + d1(1)
+        lattice(:,2) = lattice(:,2) + d1(2)
+        lattice(:,3) = lattice(:,3) + d1(3)
+    endif
 end subroutine
 
 function rotate_point(point, pivot, angle) result(new_point)
@@ -180,5 +187,12 @@ subroutine write_lattice(lattice, filename)
     enddo
     close(23)
 end subroutine
+
+function magic_angle(ind) result(angle)
+    integer, intent(in) :: ind
+    real*16             :: angle
+
+    angle = acos((real(3*ind*ind + 3*ind, 16) + 0.5e0_16)/real(3*ind*ind + 3*ind + 1, 16))
+end function
 
 end module

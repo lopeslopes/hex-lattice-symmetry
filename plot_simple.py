@@ -42,17 +42,4 @@ ax1.set_aspect(1)
 ax2.set_aspect(1)
 ax3.set_aspect(1)
 
-# # 3D PLOT (TOO SLOW)
-# ax1 = plt.subplot(111, projection='3d')
-# graf1 = ax1.scatter(points1[:,0], points1[:,1], points1[:,2], s=1)
-# ax2 = plt.subplot(111, projection='3d')
-# graf2 = ax2.scatter(points2[:,0], points2[:,1], points2[:,2], s=1)
-# ax3 = plt.subplot(111, projection='3d')
-# graf3 = ax3.scatter(points3[:,0], points3[:,1], points3[:,2], s=1)
-
-# ax1.set_box_aspect((np.ptp(points1[:,0]), np.ptp(points1[:,1]), np.ptp(points1[:,2])))
-# ax2.set_box_aspect((np.ptp(points2[:,0]), np.ptp(points2[:,1]), np.ptp(points2[:,2])))
-# ax1.azim = 90
-# ax1.elev = 90
-
 plt.show()
