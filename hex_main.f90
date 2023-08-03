@@ -4,13 +4,13 @@ implicit none
 
 real*16, dimension(:,:), allocatable :: lat1, lat2, lat1f, lat2f, lat3f
 real*16, dimension(:,:), allocatable :: lat1_aux, lat2_aux, lat3_aux
-real*16, dimension(:,:), allocatable :: latAA, latAB
+real*16, dimension(:,:), allocatable :: latA1, latA2, latB1, latB2, latAB
 real*16                              :: angle, z, a
 integer                              :: i, j, n_points, max_ind, min_ind
-logical                              :: cond3
+logical                              :: cond3, condAB, condBA
 
 n_points = 100000
-angle = magic_angle(30)!(1.08455e0_16*pi)/180.e0_16!magic_angle(29)
+angle = magic_angle(30)
 write(*,*) "angle in radians: ", angle
 write(*,*) "angle in degrees: ", (angle*180.e0_16)/pi
 z = 3.35e0_16
@@ -20,7 +20,7 @@ a = 2.46e0_16
 allocate(lat1(n_points,3))
 allocate(lat2(n_points,3))
 call create_lattice_eh(lat1, 0.e0_16, a, .false.)
-call create_lattice_eh(lat2, z      , a, .false.)
+call create_lattice_eh(lat2, z      , a, .true.)
 
 ! ROTATE LATTICE 2
 call rotate_lattice(lat2, angle)
@@ -43,17 +43,52 @@ lat2f = lat2_aux(1:j,:)
 deallocate(lat2_aux)
 deallocate(lat2)
 
+! TEST: SEPARATE LATTICE INTO A AND B
+allocate(latA1(size(lat1f,1)/2, 3))
+allocate(latA2(size(lat1f,1)/2, 3))
+allocate(latB1(size(lat2f,1)/2, 3))
+allocate(latB2(size(lat2f,1)/2, 3))
+call separate_lattice(lat1f, latA1, latB1)
+call separate_lattice(lat2f, latA2, latB2)
+
 ! FIND POINTS FROM LAT2 WHERE THERE'S A LAT1 POINT RIGHT ABOVE/BELOW
-! TODO: SEPARATE BETWEEN A AND B LATTICES TO CHECK WHICH POINTS ARE OVERLAPPING
+!allocate(lat3_aux(n_points,3))
+!j = 0
+!max_ind = 10000
+!min_ind = 0
+!do i=1, size(lat2f,1)
+!    cond3 = exists_in_lattice([lat2f(i,1), lat2f(i,2), 0.e0_16], lat1f(i-min_ind:i+max_ind,:))
+!    if (cond3) then
+!        j = j + 1
+!        lat3_aux(j,:) = lat2f(i,:)
+!    endif
+!    
+!    if (i < 10000) then
+!        min_ind = min_ind + 1
+!    else
+!        if (i > n_points - 10000) then
+!            max_ind = max_ind - 1
+!        endif
+!    endif
+!enddo
+!allocate(lat3f(j,3))
+!lat3f = lat3_aux(1:j,:)
+
+! FIND OVERLAPPING POINTS FROM LATTICES 1 AND 2, SEPARATING A AND B
 allocate(lat3_aux(n_points,3))
 j = 0
 max_ind = 10000
 min_ind = 0
-do i=1, size(lat2f,1)
-    cond3 = exists_in_lattice([lat2f(i,1), lat2f(i,2), 0.e0_16], lat1f(i-min_ind:i+max_ind,:))
-    if (cond3) then
+do i=1, size(latB2,1)
+    condAB = exists_in_lattice([latB2(i,1), latB2(i,2), 0.e0_16], latA1(i-min_ind:i+max_ind,:))
+    condBA = exists_in_lattice([latA2(i,1), latA2(i,2), 0.e0_16], latB1(i-min_ind:i+max_ind,:))
+    if (condAB) then
         j = j + 1
-        lat3_aux(j,:) = lat2f(i,:)
+        lat3_aux(j,:) = latB2(i,:)
+    endif
+    if (condBA) then
+        j = j + 1
+        lat3_aux(j,:) = latA2(i,:)
     endif
     
     if (i < 10000) then
@@ -76,5 +111,9 @@ call write_lattice(lat3f, "lattice3t.dat")
 deallocate(lat1f)
 deallocate(lat2f)
 deallocate(lat3f)
+deallocate(latA1)
+deallocate(latB1)
+deallocate(latA2)
+deallocate(latB2)
 
 end program

@@ -1,55 +1,37 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-with open(file="lattice01.dat") as f:
-    data1 = f.readlines()
+with open(file="latticeA1.dat") as f:
+    dataA1 = f.readlines()
 
-pointsA = []
-pointsB = []
+pointsA1 = []
 
-for i, line in enumerate(data1):
+for i, line in enumerate(dataA1):
     aux = line.split(";")
     ponto = [float(aux[0]), float(aux[1]), float(aux[2])]
-    if (i % 2 == 0):
-        pointsA.append(ponto)
-    else:
-        pointsB.append(ponto)
+    pointsA1.append(ponto)
 
-with open(file="lattice02.dat") as f:
-    data2 = f.readlines()
+pointsB1 = []
 
-for i, line in enumerate(data2):
+with open(file="latticeB1.dat") as f:
+    dataB1 = f.readlines()
+
+for i, line in enumerate(dataB1):
     aux = line.split(";")
     ponto = [float(aux[0]), float(aux[1]), float(aux[2])]
-    if (i % 2 == 0):
-        pointsA.append(ponto)
-    else:
-        pointsB.append(ponto)
+    pointsB1.append(ponto)
 
-pointsA = np.array(pointsA)
-pointsB = np.array(pointsB)
-
-with open(file="lattice03.dat") as f:
-    data3 = f.readlines()
-
-points3 = []
-for line in data3:
-    aux = line.split(";")
-    points3.append([float(aux[0]), float(aux[1]), float(aux[2])])
-points3 = np.array(points3)
+pointsA1 = np.array(pointsA1)
+pointsB1 = np.array(pointsB1)
 
 # 2D PLOT (FASTER)
 axA = plt.subplot(111)
-grafA = axA.scatter(pointsA[:,0], pointsA[:,1], s=10)
+grafA = axA.scatter(pointsA1[:,0], pointsA1[:,1], s=10)
 
 axB = plt.subplot(111)
-grafB = axB.scatter(pointsB[:,0], pointsB[:,1], s=10)
-
-ax3 = plt.subplot(111)
-graf3 = ax3.scatter(points3[:,0], points3[:,1], s=10)
+grafB = axB.scatter(pointsB1[:,0], pointsB1[:,1], s=10)
 
 axA.set_aspect(1)
 axB.set_aspect(1)
-ax3.set_aspect(1)
 
 plt.show()

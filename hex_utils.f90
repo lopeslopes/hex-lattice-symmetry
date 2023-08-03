@@ -188,6 +188,20 @@ subroutine write_lattice(lattice, filename)
     close(23)
 end subroutine
 
+subroutine separate_lattice(lattice, latA, latB)
+    real*16, dimension(:,:), intent(inout) :: lattice, latA, latB
+    integer                                :: i, j, k
+
+    j = 1
+    k = 1
+    do i=1, size(lattice, 1)-1, 2
+        latA(j,:) = lattice(i,:)
+        latB(k,:) = lattice(i+1,:)
+        j = j + 1
+        k = k + 1
+    enddo
+end subroutine
+
 function magic_angle(ind) result(angle)
     integer, intent(in) :: ind
     real*16             :: angle
