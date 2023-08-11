@@ -9,7 +9,7 @@ real*16                              :: angle, z, a
 integer                              :: i, j, k, n_points, max_ind, min_ind
 logical                              :: cond3, condAB, condBA, condAA, condBB
 
-n_points = 1000000
+n_points = 50000
 angle = magic_angle(30)
 write(*,*) "angle in radians: ", angle
 write(*,*) "angle in degrees: ", (angle*180.e0_16)/pi
@@ -20,7 +20,7 @@ a = 2.46e0_16
 allocate(lat1(n_points,3))
 allocate(lat2(n_points,3))
 call create_lattice_eh(lat1, 0.e0_16, a, .false.)
-call create_lattice_eh(lat2, z      , a, .false.)
+call create_lattice_eh(lat2, z      , a, .true.)
 
 ! ROTATE LATTICE 2
 call rotate_lattice(lat2, angle)
