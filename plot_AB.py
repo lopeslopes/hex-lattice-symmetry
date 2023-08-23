@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-with open(file="lat1_bernal.dat") as f:
+with open(file="lattice1t.dat") as f:
     data1 = f.readlines()
 
 points1 = []
@@ -10,7 +10,7 @@ for line in data1:
     points1.append([float(aux[0]), float(aux[1]), float(aux[2])])
 points1 = np.array(points1)
 
-with open(file="lat2_bernal.dat") as f:
+with open(file="lattice2t.dat") as f:
     data2 = f.readlines()
 
 points2 = []
@@ -19,7 +19,7 @@ for line in data2:
     points2.append([float(aux[0]), float(aux[1]), float(aux[2])])
 points2 = np.array(points2)
 
-with open(file="latAB_bernal.dat") as f:
+with open(file="lattice3t.dat") as f:
     data3 = f.readlines()
 
 points3 = []

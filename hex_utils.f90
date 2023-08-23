@@ -141,13 +141,13 @@ function rotate_point(point, pivot, angle) result(new_point)
     new_point = aux2 + pivot
 end function
 
-subroutine rotate_lattice(lattice, angle)
+subroutine rotate_lattice(lattice, angle, pivot)
     real*16, dimension(:,:), intent(inout)  :: lattice
     real*16, intent(in)                     :: angle
-    real*16, dimension(3)                   :: pivot
+    real*16, dimension(3), intent(in)       :: pivot
     integer                                 :: i
 
-    pivot = [0.e0_16, 0.e0_16, lattice(1,3)]
+    ! pivot = [0.e0_16, 0.e0_16, lattice(1,3)]
     do i=1, size(lattice,1)
         lattice(i,:) = rotate_point(lattice(i,:), pivot, angle)
     enddo
