@@ -5,18 +5,19 @@ implicit none
 real*16, dimension(:,:), allocatable :: lat1, lat2, lat1f, lat2f, lat3f, lat4f
 real*16, dimension(:,:), allocatable :: lat1_aux, lat2_aux, lat3_aux, lat4_aux
 real*16, dimension(:,:), allocatable :: latA1, latA2, latB1, latB2, latAB
-real*16, dimension(3)                :: d1, pivot
-real*16                              :: angle, z, a, d
-integer                              :: i, j, k, n_points, max_ind, min_ind, ind_angle
+real*16, dimension(3)                :: d1, origin1, origin2
+real*16, dimension(:), allocatable   :: dists
+real*16                              :: angle, z, a, d, min_dist
+integer                              :: i, j, k, n_points, max_ind, min_ind, ind_angle, cont_min
 logical                              :: cond3, condAB, condBA, condAA, condBB
 logical                              :: AB_stacking, hex_center_pivot
 
 ! INITIAL DEFINITIONS
-n_points = 50000
+n_points = 50
 a = 2.46e0_16
 z = 3.35e0_16
 hex_center_pivot = .false.
-AB_stacking = .true.
+AB_stacking = .false.
 
 if (AB_stacking) then
     write(*,*) "Stacking mode: AB (Bernal stacking)"
@@ -29,8 +30,9 @@ else
     write(*,*) "Pivot point: node at origin"
 endif
 
+ind_angle = 30
 ! LOOP OVER ANGLES CAN START HERE
-do ind_angle=25, 35
+!do ind_angle=1, 30
     ! ANGLE DEFINITION
     angle = magic_angle(ind_angle)
     write(*,*) "Angle in degrees: ", (angle*180.e0_16)/pi 
@@ -45,12 +47,14 @@ do ind_angle=25, 35
     d = sqrt((a**2)/(2.e0_16*(1.e0_16-cos(2.e0_16*pi/3.e0_16))))
     d1 = [d*cos(pi/6.e0_16), d*sin(pi/6.e0_16), z]
     if (hex_center_pivot) then
-        pivot = d1
+        origin1 = d1 - [0.e0_16, 0.e0_16, z]
+        origin2 = d1
     else
-        pivot = [0.e0_16, 0.e0_16, z]
+        origin1 = [0.e0_16, 0.e0_16, 0.e0_16]
+        origin2 = [0.e0_16, 0.e0_16, z]
     endif
 
-    call rotate_lattice(lat2, angle, pivot)
+    call rotate_lattice(lat2, angle, origin2)
 
     ! TRIM THE LATTICE 1 ------------------
     !allocate(lat1_aux(n_points, 3))
@@ -84,6 +88,22 @@ do ind_angle=25, 35
     deallocate(lat2)
     ! -------------------------------------
 
+    ! TEST: DISTANCE FROM ORIGIN
+    ! TO DO: IMPLEMENT TEST TO CHECK EXISTENCE OF POINTS IN SUBLATTICE A WITH SAME
+    ! DISTANCE THAN A POINT IN SUBLATTICE B
+    ! IF THERE IS, WE CAN TRY TO CALCULATE AN ANGLE THAT TAKES ONE ABOVE THE OTHER
+    allocate(dists(n_points))
+    call distance_from_origin(lat1f, origin1, dists)
+    min_dist = minval(dists,1)
+    cont_min = 0
+    do j=1, size(dists,1)
+        if (abs(dists(j)-min_dist) .lt. 1.e-8_16) then
+            cont_min = cont_min + 1
+        endif
+    enddo
+    write(*,*) min_dist, cont_min
+    ! -------------------------------------
+
     ! SEPARATE LATTICE INTO A AND B
     allocate(latA1(size(lat1f,1)/2, 3))
     allocate(latA2(size(lat1f,1)/2, 3))
@@ -97,7 +117,7 @@ do ind_angle=25, 35
     !allocate(lat4_aux(n_points,3))
     j = 0
     k = 0
-    max_ind = 2000
+    max_ind = 20
     min_ind = 0
     do i=1, size(latB2,1)
         condAB = exists_in_lattice([latB2(i,1), latB2(i,2), 0.e0_16], latA1(i-min_ind:i+max_ind,:))
@@ -125,10 +145,10 @@ do ind_angle=25, 35
             !lat4_aux(k,:) = latB2(i,:)
         endif
 
-        if (i < 2000) then
+        if (i < 20) then
             min_ind = min_ind + 1
         else
-            if (i > n_points - 2000) then
+            if (i > n_points - 20) then
                 max_ind = max_ind - 1
             endif
         endif
@@ -158,6 +178,6 @@ do ind_angle=25, 35
     deallocate(latB1)
     deallocate(latA2)
     deallocate(latB2)
-enddo
+!enddo
 
 end program

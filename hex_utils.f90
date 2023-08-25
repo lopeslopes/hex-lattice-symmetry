@@ -209,4 +209,21 @@ function magic_angle(ind) result(angle)
     angle = acos((real(3*ind*ind + 3*ind, 16) + 0.5e0_16)/real(3*ind*ind + 3*ind + 1, 16))
 end function
 
+subroutine distance_from_origin(lattice, origin, distances)
+    real*16, dimension(:,:), intent(in)  :: lattice
+    real*16, dimension(3), intent(in)    :: origin
+    real*16, dimension(3)                :: aux_vec
+    real*16, dimension(:), intent(inout) :: distances
+    integer                              :: i
+
+    do i=1, size(lattice,1)
+        aux_vec = lattice(i,:) - origin
+        if (sum(abs(aux_vec)) .lt. 1.e-6_16) then
+            distances(i) = 1000.e0_16
+        else
+            distances(i) = sqrt(aux_vec(1)**2 + aux_vec(2)**2 + aux_vec(3)**2)
+        endif
+    enddo
+end subroutine
+
 end module
