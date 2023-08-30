@@ -2,20 +2,17 @@ module hex_utils
 implicit none
 
 real*16, parameter, public :: pi = 4.e0_16*atan(1.e0_16)
+real*16, parameter, public :: tol = 1.e-8_16
 
 contains
 
 function exists_in_lattice(point, lattice) result(flag)
     real*16, dimension(3), intent(in)     :: point
     real*16, dimension(:,:), intent(in)   :: lattice
-    real*16                               :: tol
     logical                               :: flag
     real*16, dimension(3)                 :: vec1
     logical, dimension(:), allocatable    :: condition_list
     integer                               :: i
-
-    tol = 1.e-8_16
-    !flag = any(all(abs(spread(point, dim=1, ncopies=size(lattice,1)) - lattice) .lt. tol, dim=2))
 
     allocate(condition_list(size(lattice,1)))
     do i=1, size(lattice, 1)
@@ -67,7 +64,62 @@ subroutine create_lattice_bch(lattice, z, a)
 end subroutine
 
 ! CREATES LATTICE OF EMPTY HEXAGONS (HONEYCOMB)
-subroutine create_lattice_eh(lattice, z, a, ab_stacking)
+subroutine create_lattice_eh(latticeA, latticeB, z, a, ab_stacking)
+    real*16, dimension(:,:), intent(inout) :: latticeA, latticeB
+    real*16, intent(in)                    :: z, a
+    real*16, dimension(3)                  :: v1, v2, v3, d1, origin_a, origin_b, lat_origin
+    real*16                                :: angle, d
+    integer                                :: i, j, num_columns, row, i0
+    logical, intent(in)                    :: ab_stacking
+
+    num_columns = 2*int(sqrt(real(size(latticeA,1)*2,16)))/3
+    angle = (60.e0_16/180.e0_16) * pi
+
+    v1 = [a, 0.e0_16, 0.e0_16]
+    v2 = [a*cos(angle), a*sin(angle), 0.e0_16]
+    v3 = [-a*cos(angle), a*sin(angle), 0.e0_16]
+
+    d = sqrt((a**2)/(2.e0_16*(1.e0_16-cos(2.e0_16*angle))))
+    d1 = [d*cos(angle/2.e0_16), d*sin(angle/2.e0_16), 0.e0_16]
+
+    origin_a = [0.e0_16, 0.e0_16, z]
+    origin_b = origin_a + d1
+
+    row = 1
+    i = 1
+    do while(i < size(latticeA,1))
+        do j=1, num_columns
+            if (i > size(latticeA,1)) then
+                exit
+            endif
+            latticeA(i,:) = origin_a + real(j-1,16)*v1
+            latticeB(i,:) = origin_b + real(j-1,16)*v1
+            i = i + 1
+        enddo
+        row  = row + 1
+        if (modulo(row,2) == 1) then
+            origin_a = origin_a + v2
+            origin_b = origin_b + v2
+        else
+            origin_a = origin_a + v3
+            origin_b = origin_b + v3
+        endif
+    enddo
+
+    i0 = ((row/2) * num_columns) + (2*num_columns/3)
+    lat_origin = latticeA(i0,:)
+    
+    latticeA = latticeA - spread(lat_origin, dim=1, ncopies=size(latticeA,1))
+    latticeB = latticeB - spread(lat_origin, dim=1, ncopies=size(latticeB,1))
+
+    if (ab_stacking) then
+        latticeA = latticeA + spread(d1, dim=1, ncopies=size(latticeA,1))
+        latticeB = latticeB + spread(d1, dim=1, ncopies=size(latticeB,1))
+    endif
+end subroutine
+
+! CREATES LATTICE OF EMPTY HEXAGONS (HONEYCOMB)
+subroutine create_lattice_eh_old(lattice, z, a, ab_stacking)
     real*16, dimension(:,:), intent(inout) :: lattice
     real*16, intent(in)                    :: z, a
     real*16, dimension(3)                  :: v1, v2, v3, d1, origin_a, origin_b, lat_origin
@@ -218,12 +270,23 @@ subroutine distance_from_origin(lattice, origin, distances)
 
     do i=1, size(lattice,1)
         aux_vec = lattice(i,:) - origin
-        if (sum(abs(aux_vec)) .lt. 1.e-6_16) then
+        if (sum(abs(aux_vec)) .lt. tol) then
             distances(i) = 1000.e0_16
         else
-            distances(i) = sqrt(aux_vec(1)**2 + aux_vec(2)**2 + aux_vec(3)**2)
+            distances(i) = sqrt(dot_product(aux_vec, aux_vec))
         endif
     enddo
 end subroutine
+
+function is_equal(num1, num2)
+    real*16, intent(in)  :: num1, num2
+    logical              :: is_equal
+
+    if (abs(num1-num2) .lt. tol) then
+        is_equal = .true.
+    else
+        is_equal = .false.
+    endif
+end function
 
 end module

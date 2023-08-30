@@ -1,45 +1,60 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-with open(file="lattice1t.dat") as f:
-    data1 = f.readlines()
+with open(file="latticeA1.dat") as f:
+    dataA1 = f.readlines()
 
-points1 = []
-for line in data1:
+pointsA1 = []
+for line in dataA1:
     aux = line.split(";")
-    points1.append([float(aux[0]), float(aux[1]), float(aux[2])])
-points1 = np.array(points1)
+    pointsA1.append([float(aux[0]), float(aux[1]), float(aux[2])])
+pointsA1 = np.array(pointsA1)
 
-with open(file="lattice2t.dat") as f:
-    data2 = f.readlines()
+with open(file="latticeB1.dat") as f:
+    dataB1 = f.readlines()
 
-points2 = []
-for line in data2:
+pointsB1 = []
+for line in dataB1:
     aux = line.split(";")
-    points2.append([float(aux[0]), float(aux[1]), float(aux[2])])
-points2 = np.array(points2)
+    pointsB1.append([float(aux[0]), float(aux[1]), float(aux[2])])
+pointsB1 = np.array(pointsB1)
 
-with open(file="lattice3t.dat") as f:
-    data3 = f.readlines()
+with open(file="latticeA2.dat") as f:
+    dataA2 = f.readlines()
 
-points3 = []
-for line in data3:
+pointsA2 = []
+for line in dataA2:
     aux = line.split(";")
-    points3.append([float(aux[0]), float(aux[1]), float(aux[2])])
-points3 = np.array(points3)
+    pointsA2.append([float(aux[0]), float(aux[1]), float(aux[2])])
+pointsA2 = np.array(pointsA2)
+
+with open(file="latticeB2.dat") as f:
+    dataB2 = f.readlines()
+
+pointsB2 = []
+for line in dataB2:
+    aux = line.split(";")
+    pointsB2.append([float(aux[0]), float(aux[1]), float(aux[2])])
+pointsB2 = np.array(pointsB2)
 
 # 2D PLOT (FASTER)
-ax1 = plt.subplot(111)
-graf1 = ax1.scatter(points1[:,0], points1[:,1], s=10)
+axA1 = plt.subplot(111)
+grafA1 = axA1.scatter(pointsA1[:,0], pointsA1[:,1], s=30)
 
-ax2 = plt.subplot(111)
-graf2 = ax2.scatter(points2[:,0], points2[:,1], s=10)
+axB1 = plt.subplot(111)
+grafB1 = axB1.scatter(pointsB1[:,0], pointsB1[:,1], s=30)
 
-ax3 = plt.subplot(111)
-graf3 = ax3.scatter(points3[:,0], points3[:,1], s=10)
+axA2 = plt.subplot(111)
+grafA2 = axA2.scatter(pointsA2[:,0], pointsA2[:,1], s=10)
 
-ax1.set_aspect(1)
-ax2.set_aspect(1)
-ax3.set_aspect(1)
+axB2 = plt.subplot(111)
+grafB2 = axB2.scatter(pointsB2[:,0], pointsB2[:,1], s=10)
+
+axA1.set_aspect(1)
+axB1.set_aspect(1)
+axA2.set_aspect(1)
+axB2.set_aspect(1)
+
+plt.legend(['A1', 'B1', 'A2', 'B2'])
 
 plt.show()
