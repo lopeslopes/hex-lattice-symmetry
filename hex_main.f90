@@ -3,11 +3,11 @@ use hex_utils
 implicit none
 
 real*16, dimension(:,:), allocatable :: latA1, latA2, latB1, latB2
-real*16, dimension(3)                :: d1, origin1, origin2
-real*16, dimension(:), allocatable   :: distsA, distsB
-real*16                              :: angle, z, a, d, cur_dist
-integer                              :: i, j, k, max_ind, min_ind, ind_angle
-integer                              :: n_points, half_n, same_dist
+real*16, dimension(3)                :: d1, origin1, origin2, cur_point, eqv_point
+real*16, dimension(:), allocatable   :: distsA2, distsB2, distsB1
+real*16                              :: angle, z, a, d, cur_dist, eqv_angle, dot_prod_aux
+integer                              :: i, j, k, max_ind, min_ind, ind_angle, cur_loc
+integer                              :: n_points, half_n, same_distA, same_distB
 logical                              :: condAB, condBA, condAA, condBB
 logical                              :: AB_stacking, hex_center_pivot
 
@@ -54,49 +54,50 @@ ind_angle = 30
 
 
     ! TEST SECTION --------------------
-    allocate(distsA(half_n))
-    allocate(distsB(half_n))
+    allocate(distsA2(half_n))
+    allocate(distsB2(half_n))
+    allocate(distsB1(half_n))
 
-    call distance_from_origin(latA1, origin1, distsA)
-    call distance_from_origin(latA2, origin2, distsB)
+    call distance_from_origin(latA2, origin2, distsA2)
+    call distance_from_origin(latB2, origin2, distsB2)
+    call distance_from_origin(latB1, origin1, distsB1)
 
-    same_dist = 0
     do i=1, half_n
-        cur_dist = distsB(i)
-        same_dist = same_dist + count(abs(distsA-cur_dist) .lt. tol)
+        cur_dist = distsB1(i)
+        cur_point = [latB1(i,1), latB1(i,2), z]
+        same_distA = count(abs(distsA2-cur_dist) .lt. tol)
+        same_distB = count(abs(distsB2-cur_dist) .lt. tol)
+        cur_loc = 0
+        do while (same_distA .gt. 0)
+            write(*,*) "same dist A: ", same_distA
+            cur_loc = cur_loc + findloc(distsA2(cur_loc+1:), cur_dist, 1)
+            eqv_point = latA2(cur_loc,:)
+            eqv_angle = acos((1.e0_16/(cur_dist**2)) * dot_product(eqv_point, cur_point))
+            if (isnan(eqv_angle)) then
+                write(*,"(I4, 2X, 3F8.3, 2X, 3F8.3)") cur_loc, eqv_point, cur_point
+            else
+                eqv_angle = (eqv_angle * 180.e0_16) / pi
+                write(*,*) "A: ", eqv_angle
+            endif
+            same_distA = same_distA - 1
+        enddo
+        cur_loc = 0
+        do while (same_distB .gt. 0)
+            write(*,*) "same dist B: ", same_distB
+            cur_loc = cur_loc + findloc(distsB2(cur_loc+1:), cur_dist, 1)
+            eqv_point = latB2(cur_loc,:)
+            eqv_angle = acos((1.e0_16/(cur_dist**2)) * dot_product(eqv_point, cur_point))
+            if (isnan(eqv_angle)) then
+                write(*,"(I4, 2X, 3F8.3, 2X, 3F8.3)") cur_loc, eqv_point, cur_point
+            else
+                eqv_angle = (eqv_angle * 180.e0_16) / pi
+                write(*,*) "B: ", eqv_angle
+            endif
+            same_distB = same_distB - 1
+        enddo
     enddo
-    write(*,*) "A1 and A2: ", same_dist
-
-    call distance_from_origin(latA1, origin1, distsA)
-    call distance_from_origin(latB2, origin2, distsB)
-
-    same_dist = 0
-    do i=1, half_n
-        cur_dist = distsB(i)
-        same_dist = same_dist + count(abs(distsA-cur_dist) .lt. tol)
-    enddo
-    write(*,*) "A1 and B2: ", same_dist
-
-    call distance_from_origin(latB1, origin1, distsA)
-    call distance_from_origin(latA2, origin2, distsB)
-
-    same_dist = 0
-    do i=1, half_n
-        cur_dist = distsB(i)
-        same_dist = same_dist + count(abs(distsA-cur_dist) .lt. tol)
-    enddo
-    write(*,*) "B1 and A2: ", same_dist
-
-    call distance_from_origin(latB1, origin1, distsA)
-    call distance_from_origin(latB2, origin2, distsB)
-
-    same_dist = 0
-    do i=1, half_n
-        cur_dist = distsB(i)
-        same_dist = same_dist + count(abs(distsA-cur_dist) .lt. tol)
-    enddo
-    write(*,*) "B1 and B2: ", same_dist
-    deallocate(distsA, distsB)
+    
+    deallocate(distsA2, distsB2, distsB1)
     ! ---------------------------------
 
     ! ROTATE LATTICE 2
