@@ -12,12 +12,12 @@ logical                              :: condAB, condBA, condAA, condBB
 logical                              :: AB_stacking, hex_center_pivot
 
 ! INITIAL DEFINITIONS
-n_points = 24
+n_points = 48
 half_n = n_points/2
 a = 2.46e0_16
 z = 3.35e0_16
 hex_center_pivot = .false.
-AB_stacking = .false.
+AB_stacking = .true.
 
 if (AB_stacking) then
     write(*,*) "Stacking mode: AB (Bernal stacking)"
@@ -62,9 +62,40 @@ ind_angle = 30
 
     same_dist = 0
     do i=1, half_n
-        write(*,"(F10.5, 2X, F10.5)") distsA(i), distsB(i)
+        cur_dist = distsB(i)
+        same_dist = same_dist + count(abs(distsA-cur_dist) .lt. tol)
     enddo
+    write(*,*) "A1 and A2: ", same_dist
 
+    call distance_from_origin(latA1, origin1, distsA)
+    call distance_from_origin(latB2, origin2, distsB)
+
+    same_dist = 0
+    do i=1, half_n
+        cur_dist = distsB(i)
+        same_dist = same_dist + count(abs(distsA-cur_dist) .lt. tol)
+    enddo
+    write(*,*) "A1 and B2: ", same_dist
+
+    call distance_from_origin(latB1, origin1, distsA)
+    call distance_from_origin(latA2, origin2, distsB)
+
+    same_dist = 0
+    do i=1, half_n
+        cur_dist = distsB(i)
+        same_dist = same_dist + count(abs(distsA-cur_dist) .lt. tol)
+    enddo
+    write(*,*) "B1 and A2: ", same_dist
+
+    call distance_from_origin(latB1, origin1, distsA)
+    call distance_from_origin(latB2, origin2, distsB)
+
+    same_dist = 0
+    do i=1, half_n
+        cur_dist = distsB(i)
+        same_dist = same_dist + count(abs(distsA-cur_dist) .lt. tol)
+    enddo
+    write(*,*) "B1 and B2: ", same_dist
     deallocate(distsA, distsB)
     ! ---------------------------------
 

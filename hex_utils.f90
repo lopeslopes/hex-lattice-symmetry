@@ -107,7 +107,7 @@ subroutine create_lattice_eh(latticeA, latticeB, z, a, ab_stacking)
     enddo
 
     i0 = ((row/2) * num_columns) + (2*num_columns/3)
-    lat_origin = latticeA(i0,:)
+    lat_origin = [latticeA(i0,1), latticeA(i0,2), 0.e0_16]
     
     latticeA = latticeA - spread(lat_origin, dim=1, ncopies=size(latticeA,1))
     latticeB = latticeB - spread(lat_origin, dim=1, ncopies=size(latticeB,1))
