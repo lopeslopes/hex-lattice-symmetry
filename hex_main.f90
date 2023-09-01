@@ -12,7 +12,7 @@ logical                              :: condAB, condBA, condAA, condBB
 logical                              :: AB_stacking, hex_center_pivot
 
 ! INITIAL DEFINITIONS
-n_points = 48
+n_points = 50000
 half_n = n_points/2
 a = 2.46e0_16
 z = 3.35e0_16
@@ -42,7 +42,7 @@ ind_angle = 30
 !do ind_angle=1, 30
     ! ANGLE DEFINITION
     angle = magic_angle(ind_angle)
-    write(*,*) "Angle in degrees: ", (angle*180.e0_16)/pi 
+    !write(*,*) "Angle in degrees: ", (angle*180.e0_16)/pi 
 
     ! ALLOCATE AND CREATE LATTICES
     allocate(latA1(half_n,3))
@@ -62,40 +62,48 @@ ind_angle = 30
     call distance_from_origin(latB2, origin2, distsB2)
     call distance_from_origin(latB1, origin1, distsB1)
 
+    open(30, file="anglesA.dat")
+    open(31, file="anglesB.dat")
+
     do i=1, half_n
         cur_dist = distsB1(i)
         cur_point = [latB1(i,1), latB1(i,2), z]
         same_distA = count(abs(distsA2-cur_dist) .lt. tol)
         same_distB = count(abs(distsB2-cur_dist) .lt. tol)
-        cur_loc = 0
+        
         do while (same_distA .gt. 0)
-            write(*,*) "same dist A: ", same_distA
-            cur_loc = cur_loc + findloc(distsA2(cur_loc+1:), cur_dist, 1)
+            cur_loc = findloc(distsA2, cur_dist, 1)
+            if (cur_loc == 0) then
+                exit
+            endif
             eqv_point = latA2(cur_loc,:)
             eqv_angle = acos((1.e0_16/(cur_dist**2)) * dot_product(eqv_point, cur_point))
-            if (isnan(eqv_angle)) then
-                write(*,"(I4, 2X, 3F8.3, 2X, 3F8.3)") cur_loc, eqv_point, cur_point
-            else
+            if (isnan(eqv_angle) .eqv. .false.) then
                 eqv_angle = (eqv_angle * 180.e0_16) / pi
-                write(*,*) "A: ", eqv_angle
+                write(30,*) eqv_angle
             endif
             same_distA = same_distA - 1
+            distsA2(cur_loc) = 5000.e0_16
         enddo
-        cur_loc = 0
+
         do while (same_distB .gt. 0)
-            write(*,*) "same dist B: ", same_distB
-            cur_loc = cur_loc + findloc(distsB2(cur_loc+1:), cur_dist, 1)
+            cur_loc = findloc(distsB2, cur_dist, 1)
+            if (cur_loc == 0) then
+                exit
+            endif
             eqv_point = latB2(cur_loc,:)
             eqv_angle = acos((1.e0_16/(cur_dist**2)) * dot_product(eqv_point, cur_point))
-            if (isnan(eqv_angle)) then
-                write(*,"(I4, 2X, 3F8.3, 2X, 3F8.3)") cur_loc, eqv_point, cur_point
-            else
+            if (isnan(eqv_angle) .eqv. .false.) then
                 eqv_angle = (eqv_angle * 180.e0_16) / pi
-                write(*,*) "B: ", eqv_angle
+                write(31,*) eqv_angle
             endif
             same_distB = same_distB - 1
+            distsB2(cur_loc) = 5000.e0_16
         enddo
     enddo
+
+    close(30)
+    close(31)
     
     deallocate(distsA2, distsB2, distsB1)
     ! ---------------------------------
