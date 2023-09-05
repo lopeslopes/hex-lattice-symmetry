@@ -62,7 +62,7 @@ try:
     axAA = plt.subplot(111)
     grafAA = axAA.scatter(pointsAA[:,0], pointsAA[:,1], s=20, color="red")
 except:
-    print("No AA points found")
+    print("No AA or BB points found")
 
 try:
     with open(file="latticeAB.dat") as f:
@@ -76,7 +76,7 @@ try:
     axAB = plt.subplot(111)
     grafAB = axAB.scatter(pointsAB[:,0], pointsAB[:,1], s=20, color="green")
 except:
-    print("No AB points found")
+    print("No AB or BA points found")
 
 axA1.set_aspect(1)
 axB1.set_aspect(1)
