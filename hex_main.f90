@@ -13,12 +13,12 @@ logical                              :: condAB, condBA, condAA, condBB
 logical                              :: AB_stacking, hex_center_pivot
 
 ! INITIAL DEFINITIONS
-n_points = 20000
+n_points = 10000
 half_n = n_points/2
 a = 2.46e0_16
 z = 3.35e0_16
 hex_center_pivot = .false.
-AB_stacking = .true.
+AB_stacking = .false.
 
 ! STACKING AND ORIGIN DEFINITION
 if (AB_stacking) then
@@ -49,62 +49,62 @@ call create_lattice_eh(latA1, latB1, 0.e0_16, a, .false.)
 call create_lattice_eh(latA2, latB2, z      , a, AB_stacking)
 
 ! OBTAINING POSSIBLE ANGLES
-allocate(distsA2(half_n))
-allocate(distsB2(half_n))
-allocate(distsB1(half_n))
+!allocate(distsA2(half_n))
+!allocate(distsB2(half_n))
+!allocate(distsB1(half_n))
+!
+!call distance_from_origin(latA2, origin2, distsA2)
+!call distance_from_origin(latB2, origin2, distsB2)
+!call distance_from_origin(latB1, origin1, distsB1)
+!
+!open(30, file="anglesA.dat")
+!open(31, file="anglesB.dat")
 
-call distance_from_origin(latA2, origin2, distsA2)
-call distance_from_origin(latB2, origin2, distsB2)
-call distance_from_origin(latB1, origin1, distsB1)
+!do i=1, half_n
+!    cur_dist = distsB1(i)
+!    cur_point = [latB1(i,1), latB1(i,2), z]
+!    same_distA = count(abs(distsA2-cur_dist) .lt. tol)
+!    same_distB = count(abs(distsB2-cur_dist) .lt. tol)
+!    
+!    do while (same_distA .gt. 0)
+!        cur_loc = findloc(distsA2, cur_dist, 1)
+!        if (cur_loc == 0) then
+!            exit
+!        endif
+!        eqv_point = latA2(cur_loc,:)
+!        eqv_angle = acos((1.e0_16/(cur_dist**2)) * dot_product(eqv_point, cur_point))
+!        if (isnan(eqv_angle) .eqv. .false.) then
+!            write(30,*) eqv_angle
+!        endif
+!        same_distA = same_distA - 1
+!        distsA2(cur_loc) = 5000.e0_16
+!    enddo
+!    
+!    do while (same_distB .gt. 0)
+!        cur_loc = findloc(distsB2, cur_dist, 1)
+!        if (cur_loc == 0) then
+!            exit
+!        endif
+!        eqv_point = latB2(cur_loc,:)
+!        eqv_angle = acos((1.e0_16/(cur_dist**2)) * dot_product(eqv_point, cur_point))
+!        if (isnan(eqv_angle) .eqv. .false.) then
+!            write(31,*) eqv_angle
+!        endif
+!        same_distB = same_distB - 1
+!        distsB2(cur_loc) = 5000.e0_16
+!    enddo
+!enddo
 
-open(30, file="anglesA.dat")
-open(31, file="anglesB.dat")
+!close(30)
+!close(31)
 
-do i=1, half_n
-    cur_dist = distsB1(i)
-    cur_point = [latB1(i,1), latB1(i,2), z]
-    same_distA = count(abs(distsA2-cur_dist) .lt. tol)
-    same_distB = count(abs(distsB2-cur_dist) .lt. tol)
-    
-    do while (same_distA .gt. 0)
-    cur_loc = findloc(distsA2, cur_dist, 1)
-    if (cur_loc == 0) then
-        exit
-    endif
-    eqv_point = latA2(cur_loc,:)
-    eqv_angle = acos((1.e0_16/(cur_dist**2)) * dot_product(eqv_point, cur_point))
-    if (isnan(eqv_angle) .eqv. .false.) then
-        write(30,*) eqv_angle
-    endif
-    same_distA = same_distA - 1
-    distsA2(cur_loc) = 5000.e0_16
-    enddo
-    
-    do while (same_distB .gt. 0)
-    cur_loc = findloc(distsB2, cur_dist, 1)
-    if (cur_loc == 0) then
-        exit
-    endif
-    eqv_point = latB2(cur_loc,:)
-    eqv_angle = acos((1.e0_16/(cur_dist**2)) * dot_product(eqv_point, cur_point))
-    if (isnan(eqv_angle) .eqv. .false.) then
-        write(31,*) eqv_angle
-    endif
-    same_distB = same_distB - 1
-    distsB2(cur_loc) = 5000.e0_16
-    enddo
-enddo
-
-close(30)
-close(31)
-
-deallocate(distsA2, distsB2, distsB1)
+!deallocate(distsA2, distsB2, distsB1)
 
 ! TESTING OBTAINED ANGLES
 !do ind_angle=1, 30
     ! ANGLE DEFINITION
-    angle = magic_angle(1)
-    write(*,*) "Angle in degrees: ", (angle*180.e0_16)/pi 
+    angle = magic_angle(10)
+    write(*,*) "Angle in degrees: ", angle 
 
     ! ROTATE LATTICE 2
     call rotate_lattice(latA2, angle, origin2)
