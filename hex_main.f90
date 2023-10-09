@@ -48,65 +48,13 @@ allocate(latB2(half_n,3))
 call create_lattice_eh(latA1, latB1, 0.e0_16, a, .false.)
 call create_lattice_eh(latA2, latB2, z      , a, AB_stacking)
 
-! OBTAINING POSSIBLE ANGLES (SOMETHING WRONG HERE!!!!!)
-!allocate(distsA2(half_n))
-!allocate(distsB2(half_n))
-!allocate(distsB1(half_n))
-!
-!call distance_from_origin(latA2, origin2, distsA2)
-!call distance_from_origin(latB2, origin2, distsB2)
-!call distance_from_origin(latB1, origin1, distsB1)
-!
-!open(30, file="anglesA.dat")
-!open(31, file="anglesB.dat")
-
-!do i=1, half_n
-!    cur_dist = distsB1(i)
-!    cur_point = [latB1(i,1), latB1(i,2), z]
-!    same_distA = count(abs(distsA2-cur_dist) .lt. tol)
-!    same_distB = count(abs(distsB2-cur_dist) .lt. tol)
-!    
-!    do while (same_distA .gt. 0)
-!        cur_loc = findloc(distsA2, cur_dist, 1)
-!        if (cur_loc == 0) then
-!            exit
-!        endif
-!        eqv_point = latA2(cur_loc,:)
-!        eqv_angle = acos((1.e0_16/(cur_dist**2)) * dot_product(eqv_point, cur_point))
-!        if (isnan(eqv_angle) .eqv. .false.) then
-!            write(30,*) eqv_angle
-!        endif
-!        same_distA = same_distA - 1
-!        distsA2(cur_loc) = 5000.e0_16
-!    enddo
-!    
-!    do while (same_distB .gt. 0)
-!        cur_loc = findloc(distsB2, cur_dist, 1)
-!        if (cur_loc == 0) then
-!            exit
-!        endif
-!        eqv_point = latB2(cur_loc,:)
-!        eqv_angle = acos((1.e0_16/(cur_dist**2)) * dot_product(eqv_point, cur_point))
-!        if (isnan(eqv_angle) .eqv. .false.) then
-!            write(31,*) eqv_angle
-!        endif
-!        same_distB = same_distB - 1
-!        distsB2(cur_loc) = 5000.e0_16
-!    enddo
-!enddo
-
-!close(30)
-!close(31)
-
-!deallocate(distsA2, distsB2, distsB1)
-
 ! TESTING ANGLES
 angle = magic_angle(15)
 write(*,*) "Angle in radians: ", angle 
 
 ! ROTATE LATTICE 2
-call rotate_lattice(latA2, angle, origin2)
-call rotate_lattice(latB2, angle, origin2)
+call rotate_lattice(latA2, angle, origin2, 3)
+call rotate_lattice(latB2, angle, origin2, 3)
 
 ! FIND OVERLAPPING POINTS FROM LATTICES 1 AND 2, SEPARATING A AND B
 allocate(lat_AA_aux(n_points,3))
