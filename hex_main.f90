@@ -48,13 +48,16 @@ allocate(latB2(half_n,3))
 call create_lattice_eh(latA1, latB1, 0.e0_16, a, .false.)
 call create_lattice_eh(latA2, latB2, z      , a, AB_stacking)
 
-! TESTING ANGLES
-angle = magic_angle(15)
-write(*,*) "Angle in radians: ", angle 
+call sym_operation(11, latA2, origin2)
+call sym_operation(11, latB2, origin2)
 
-! ROTATE LATTICE 2
-call rotate_lattice(latA2, angle, origin2, 3)
-call rotate_lattice(latB2, angle, origin2, 3)
+! ! TESTING ANGLES
+! angle = magic_angle(15)
+! write(*,*) "Angle in radians: ", angle 
+! 
+! ! ROTATE LATTICE 2
+! call rotate_lattice(latA2, angle, origin2, 3)
+! call rotate_lattice(latB2, angle, origin2, 3)
 
 ! FIND OVERLAPPING POINTS FROM LATTICES 1 AND 2, SEPARATING A AND B
 allocate(lat_AA_aux(n_points,3))

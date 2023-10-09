@@ -6,34 +6,6 @@ real*16, parameter, public :: tol = 1.e-8_16
 
 contains
 
-! LEGACY ----------------------------------------
-function rotate_point_old(point, pivot, angle) result(new_point)
-    real*16, dimension(3), intent(in) :: point
-    real*16, intent(in)               :: angle
-    real*16, dimension(3)             :: aux1, aux2, pivot, new_point
-
-    aux1 = point - pivot
-    
-    aux2(1) = aux1(1)*cos(angle) - aux1(2)*sin(angle)
-    aux2(2) = aux1(1)*sin(angle) + aux1(2)*cos(angle)
-    aux2(3) = aux1(3)
-
-    new_point = aux2 + pivot
-end function
-
-subroutine rotate_lattice_old(lattice, angle, pivot)
-    real*16, dimension(:,:), intent(inout)  :: lattice
-    real*16, intent(in)                     :: angle
-    real*16, dimension(3), intent(in)       :: pivot
-    integer                                 :: i
-
-    do i=1, size(lattice,1)
-        lattice(i,:) = rotate_point_old(lattice(i,:), pivot, angle)
-    enddo
-end subroutine
-
-! -----------------------------------------------
-
 function magic_angle(ind) result(angle)
     integer, intent(in) :: ind
     real*16             :: angle
@@ -182,10 +154,12 @@ subroutine rotate_lattice(lattice, angle, pivot, axis)
     enddo
 end subroutine
 
-subroutine sym_operation(index)
-    integer, intent(in)  :: index
-    real, dimension(3,3) :: rot_matrix
-    real*16              :: rot_angle
+subroutine sym_operation(index, lattice, pivot)
+    real*16, dimension(:,:), intent(inout)  :: lattice
+    real*16, dimension(3), intent(in)       :: pivot
+    integer, intent(in)                     :: index
+    real*16                                 :: rot_angle
+    integer                                 :: axis
 
     ! TABLE OF CORRESPONDENCE OF INDEXES TO SYM. OP.
     !  1 --> E
@@ -199,7 +173,48 @@ subroutine sym_operation(index)
     !  9 --> C'2_3
     ! 10 --> C''2_1
     ! 11 --> C''2_2
-    ! 12 --> C''2_3 
+    ! 12 --> C''2_3
+
+    select case (index)
+        case(1) ! E
+            rot_angle = 0.e0_16
+            axis = 1
+        case(2) ! C6_1
+            rot_angle = pi/3.e0_16
+            axis = 3
+        case(3) ! C6_2
+            rot_angle = (5.e0_16*pi)/3.e0_16
+            axis = 3
+        case(4) ! C3_1
+            rot_angle = (2.e0_16*pi)/3.e0_16
+            axis = 3
+        case(5) ! C3_2
+            rot_angle = (4.e0_16*pi)/3.e0_16
+            axis = 3
+        case(6) ! C2
+            rot_angle = pi
+            axis = 3
+        case(7) ! C'2_1
+            rot_angle = pi
+            axis = 1
+        case(8) ! C'2_2 FIX AXIS TO USE THIS
+            rot_angle = 0.e0_16
+            axis = 1
+        case(9) ! C'2_3 FIX AXIS TO USE THIS
+            rot_angle = 0.e0_16
+            axis = 1
+        case(10) ! C''2_1 FIX AXIS TO USE THIS
+            rot_angle = 0.e0_16
+            axis = 1
+        case(11) ! C''2_2
+            rot_angle = pi
+            axis = 2
+        case(12) ! C''2_3 FIX AXIS TO USE THIS
+            rot_angle = 0.e0_16
+            axis = 1
+    end select
+
+    call rotate_lattice(lattice, rot_angle, pivot, axis)
 end subroutine
 
 end module
