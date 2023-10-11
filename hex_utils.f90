@@ -29,7 +29,7 @@ function exists_in_lattice(point, lattice) result(flag)
     flag = any(condition_list .eqv. .true.)
 end function
 
-subroutine create_lattice_eh(latticeA, latticeB, z, a, ab_stacking)
+subroutine create_honeycomb_lattice(latticeA, latticeB, z, a, ab_stacking)
     real*16, dimension(:,:), intent(inout) :: latticeA, latticeB
     real*16, intent(in)                    :: z, a
     real*16, dimension(3)                  :: v1, v2, v3, d1, origin_a, origin_b, lat_origin
@@ -71,7 +71,7 @@ subroutine create_lattice_eh(latticeA, latticeB, z, a, ab_stacking)
         endif
     enddo
 
-    i0 = ((row/2) * num_columns) + (2*num_columns/4)
+    i0 = ((row/2) * num_columns) + (num_columns/2)
     lat_origin = [latticeA(i0,1), latticeA(i0,2), 0.e0_16]
     
     latticeA = latticeA - spread(lat_origin, dim=1, ncopies=size(latticeA,1))
@@ -152,6 +152,57 @@ subroutine rotate_lattice(lattice, angle, pivot, axis)
     do i=1, size(lattice,1)
         lattice(i,:) = rotate_point(lattice(i,:), pivot, angle, axis)
     enddo
+end subroutine
+
+subroutine make_std_rotation_matrix(matrix, axis_index, angle)
+    real*16, dimension(3,3), intent(inout)  :: matrix
+    real*16, intent(in)                     :: angle
+    integer                                 :: axis_index
+    
+    select case (axis_index)
+        case(1)
+            matrix(1,:) = [1.e0_16,    0.e0_16,     0.e0_16]
+            matrix(2,:) = [0.e0_16, cos(angle), -sin(angle)]
+            matrix(3,:) = [0.e0_16, sin(angle),  cos(angle)]
+        case(2)
+            matrix(1,:) = [ cos(angle), 0.e0_16, sin(angle)]
+            matrix(2,:) = [    0.e0_16, 1.e0_16,    0.e0_16]
+            matrix(3,:) = [-sin(angle), 0.e0_16, cos(angle)]
+        case(3)
+            matrix(1,:) = [cos(angle), -sin(angle), 0.e0_16]
+            matrix(2,:) = [sin(angle),  cos(angle), 0.e0_16]
+            matrix(3,:) = [   0.e0_16,     0.e0_16, 1.e0_16]
+    end select
+end subroutine
+
+subroutine rotate_lattice_2(lattice, angle, pivot, axis)
+    real*16, dimension(:,:), intent(inout)  :: lattice
+    real*16, dimension(3), intent(in)       :: pivot, axis
+    real*16, intent(in)                     :: angle
+    real*16, dimension(3,3)                 :: uxu, skew_u, rotation, identity
+    integer                                 :: i
+
+    identity(1,:) = [1.e0_16, 0.e0_16, 0.e0_16]
+    identity(2,:) = [0.e0_16, 1.e0_16, 0.e0_16]
+    identity(3,:) = [0.e0_16, 0.e0_16, 1.e0_16]
+
+    uxu(1,:) = [axis(1)*axis(1), axis(1)*axis(2), axis(1)*axis(3)]
+    uxu(2,:) = [axis(2)*axis(1), axis(2)*axis(2), axis(2)*axis(3)]
+    uxu(3,:) = [axis(3)*axis(1), axis(3)*axis(2), axis(3)*axis(3)]
+
+    skew_u(1,:) = [ 0.e0_16, -axis(3),  axis(2)]
+    skew_u(2,:) = [ axis(3),  0.e0_16, -axis(2)]
+    skew_u(3,:) = [-axis(2),  axis(1),  0.e0_16]
+
+    rotation = cos(angle/2.e0_16)*identity + &
+             & (1.e0_16 - sin(angle/2.e0_16))*uxu + &
+             & sin(angle/2.e0_16)*skew_u
+
+    lattice = lattice - spread(pivot, dim=1, ncopies=size(lattice,1))
+    do i=1, size(lattice,1)
+        lattice(i,:) = matmul(rotation,lattice(i,:))
+    enddo
+    lattice = lattice + spread(pivot, dim=1, ncopies=size(lattice,1))
 end subroutine
 
 subroutine sym_operation(index, lattice, pivot)

@@ -7,14 +7,12 @@ real*16, dimension(:,:), allocatable :: latAA, latAB, lat_AB_aux, lat_AA_aux
 real*16, dimension(3)                :: d1, origin1, origin2, cur_point, eqv_point
 real*16, dimension(:), allocatable   :: distsA2, distsB2, distsB1
 real*16                              :: angle, z, a, d, cur_dist, eqv_angle
-integer                              :: i, j, k, l, m, ind_angle, cur_loc
-integer                              :: n_points, half_n, same_distA, same_distB
+integer                              :: i, j, k, l, m, n, ind_angle, cur_loc
 logical                              :: condAB, condBA, condAA, condBB
 logical                              :: AB_stacking, hex_center_pivot
 
 ! INITIAL DEFINITIONS
-n_points = 10000
-half_n = n_points/2
+n = 10000
 a = 2.46e0_16
 z = 3.35e0_16
 hex_center_pivot = .true.
@@ -40,33 +38,36 @@ else
 endif
 
 ! ALLOCATION OF LATTICES AND FIRST CREATION
-allocate(latA1(half_n,3))
-allocate(latB1(half_n,3))
-allocate(latA2(half_n,3))
-allocate(latB2(half_n,3))
+allocate(latA1(n/2,3))
+allocate(latB1(n/2,3))
+allocate(latA2(n/2,3))
+allocate(latB2(n/2,3))
 
-call create_lattice_eh(latA1, latB1, 0.e0_16, a, .false.)
-call create_lattice_eh(latA2, latB2, z      , a, AB_stacking)
+call create_honeycomb_lattice(latA1, latB1, 0.e0_16, a, .false.)
+call create_honeycomb_lattice(latA2, latB2,       z, a, AB_stacking)
 
-call sym_operation(11, latA2, origin2)
-call sym_operation(11, latB2, origin2)
+!call sym_operation(11, latA2, origin2)
+!call sym_operation(11, latB2, origin2)
 
-! ! TESTING ANGLES
-! angle = magic_angle(15)
-! write(*,*) "Angle in radians: ", angle 
-! 
+! TESTING ANGLES
+angle = pi/3.e0_16
+write(*,*) "Angle in radians: ", angle 
+
 ! ! ROTATE LATTICE 2
-! call rotate_lattice(latA2, angle, origin2, 3)
-! call rotate_lattice(latB2, angle, origin2, 3)
+! call rotate_lattice_2(latA2, angle, origin2, [0.e0_16, 0.e0_16, 1.e0_16])
+! call rotate_lattice_2(latB2, angle, origin2, [0.e0_16, 0.e0_16, 1.e0_16])
+
+call rotate_lattice(latA2, angle, origin2, 3)
+call rotate_lattice(latB2, angle, origin2, 3)
 
 ! FIND OVERLAPPING POINTS FROM LATTICES 1 AND 2, SEPARATING A AND B
-allocate(lat_AA_aux(n_points,3))
-allocate(lat_AB_aux(n_points,3))
+allocate(lat_AA_aux(n,3))
+allocate(lat_AB_aux(n,3))
 j = 0
 k = 0
 l = 0
 m = 0
-do i=1, half_n
+do i=1, n/2
     condAB = exists_in_lattice([latB2(i,1),latB2(i,2),0.e0_16], latA1)
     condBA = exists_in_lattice([latA2(i,1),latA2(i,2),0.e0_16], latB1)
     condAA = exists_in_lattice([latA2(i,1),latA2(i,2),0.e0_16], latA1)
