@@ -5,6 +5,7 @@ implicit none
 real*16, dimension(:,:), allocatable :: latA1, latA2, latB1, latB2
 real*16, dimension(:,:), allocatable :: latA_ol, latB_ol, latA_ol_aux, latB_ol_aux
 real*16, dimension(:,:), allocatable :: latAq1, latBq1, latauxq1a, latauxq1b
+real*16, dimension(:,:), allocatable :: latAA, latAB, lat_AA_aux, lat_AB_aux
 real*16, dimension(3)                :: d1, origin1, origin2
 real*16, dimension(:), allocatable   :: distsA, distsB
 real*16                              :: angle, z, a, d, diff
@@ -77,14 +78,16 @@ call distance_from_origin(latAq1, origin1, distsA)
 call distance_from_origin(latBq1, origin1, distsB)
 
 ! SEARCH FOR POINTS THAT ARE CLOSE TO EACH OTHER IN DISTANCE
+write(*,*) "tolerance: ", tol
 m = 0
 allocate(latA_ol_aux(n,3))
 allocate(latB_ol_aux(n,3))
 do i1=1, k1
     do j1=1, l1
         diff = abs(distsA(i1)-distsB(j1))
-        if (diff .lt. 2.4e-3_16) then
-            write(*,*) diff, find_angle(latAq1(i1,:), latBq1(j1,:))
+        if (diff .lt. tol) then
+            angle = find_angle(latAq1(i1,:), latBq1(j1,:))
+            write(*,*) diff, angle
             m = m + 1
             latA_ol_aux(m,:) = latAq1(i1,:)
             latB_ol_aux(m,:) = latBq1(j1,:)
@@ -97,6 +100,46 @@ latA_ol = latA_ol_aux(1:m,:)
 latB_ol = latB_ol_aux(1:m,:)
 deallocate(latA_ol_aux, latB_ol_aux)
 
+! ROTATE SECOND LATTICE BY THE ANGLE
+call rotate_lattice(latA2, angle, origin2, 3)
+call rotate_lattice(latB2, angle, origin2, 3)
+
+! CHECK IF THERE'S ANY POINTS OVERLAPING (CHECK TOLERANCE)
+allocate(lat_AA_aux(n,3))
+allocate(lat_AB_aux(n,3))
+j = 0
+k = 0
+l = 0
+m = 0
+do i=1, n/2
+    condAB = exists_in_lattice([latB2(i,1),latB2(i,2),0.e0_16], latA1)
+    condBA = exists_in_lattice([latA2(i,1),latA2(i,2),0.e0_16], latB1)
+    condAA = exists_in_lattice([latA2(i,1),latA2(i,2),0.e0_16], latA1)
+    condBB = exists_in_lattice([latB2(i,1),latB2(i,2),0.e0_16], latB1)
+    if (condAB) then
+        j = j + 1
+        lat_AB_aux(j+k,:) = latB2(i,:)
+    endif
+    if (condBA) then
+        k = k + 1
+        lat_AB_aux(k+j,:) = latA2(i,:)
+    endif
+    if (condAA) then
+        l = l + 1
+        lat_AA_aux(l+m,:) = latA2(i,:)
+    endif
+    if (condBB) then
+        m = m + 1
+        lat_AA_aux(m+l,:) = latB2(i,:)
+    endif
+enddo
+allocate(latAA(m+l,3))
+allocate(latAB(j+k,3))
+latAA = lat_AA_aux(1:l+m,:)
+latAB = lat_AB_aux(1:j+k,:)
+deallocate(lat_AB_aux, lat_AA_aux)
+
+
 ! WRITE LATTICES TO FILE
 call write_lattice(latA1, "latticeA1.dat")
 call write_lattice(latB1, "latticeB1.dat")
@@ -104,8 +147,15 @@ call write_lattice(latA2, "latticeA2.dat")
 call write_lattice(latB2, "latticeB2.dat")
 call write_lattice(latA_ol, "latticeOA.dat")
 call write_lattice(latB_ol, "latticeOB.dat")
+call write_lattice(latAA, "latticeAA.dat")
+call write_lattice(latAB, "latticeAB.dat")
 
 ! DEALLOCATE
-deallocate(latA1, latB1, latA2, latB2, latA_ol, latB_ol)
+deallocate(latA1, latB1, latA2, latB2, latA_ol, latB_ol, latAA, latAB)
+
+write(*,*) "  Number of AB points: ", j
+write(*,*) "  Number of BA points: ", k
+write(*,*) "  Number of AA points: ", l
+write(*,*) "  Number of BB points: ", m
 
 end program
