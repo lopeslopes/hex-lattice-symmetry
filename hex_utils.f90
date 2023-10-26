@@ -154,118 +154,21 @@ subroutine rotate_lattice(lattice, angle, pivot, axis)
     enddo
 end subroutine
 
-subroutine make_std_rotation_matrix(matrix, axis_index, angle)
-    real*16, dimension(3,3), intent(inout)  :: matrix
-    real*16, intent(in)                     :: angle
-    integer                                 :: axis_index
-    
-    select case (axis_index)
-        case(1)
-            matrix(1,:) = [1.e0_16,    0.e0_16,     0.e0_16]
-            matrix(2,:) = [0.e0_16, cos(angle), -sin(angle)]
-            matrix(3,:) = [0.e0_16, sin(angle),  cos(angle)]
-        case(2)
-            matrix(1,:) = [ cos(angle), 0.e0_16, sin(angle)]
-            matrix(2,:) = [    0.e0_16, 1.e0_16,    0.e0_16]
-            matrix(3,:) = [-sin(angle), 0.e0_16, cos(angle)]
-        case(3)
-            matrix(1,:) = [cos(angle), -sin(angle), 0.e0_16]
-            matrix(2,:) = [sin(angle),  cos(angle), 0.e0_16]
-            matrix(3,:) = [   0.e0_16,     0.e0_16, 1.e0_16]
-    end select
-end subroutine
+function find_angle(point1, point2) result(angle)
+    real*16, dimension(3), intent(in)   :: point1, point2
+    real*16                             :: angle
+    real*16                             :: x1, x2, y1, y2, l1, l2, l3
 
-subroutine rotate_lattice_2(lattice, angle, pivot, axis)
-    real*16, dimension(:,:), intent(inout)  :: lattice
-    real*16, dimension(3), intent(in)       :: pivot, axis
-    real*16, intent(in)                     :: angle
-    real*16, dimension(3,3)                 :: uxu, skew_u, rotation, identity
-    integer                                 :: i
+    x1 = max(point1(1), point2(1))
+    x2 = min(point1(1), point2(1))
+    y1 = min(point1(2), point2(2))
+    y2 = max(point1(2), point2(2))
 
-    identity(1,:) = [1.e0_16, 0.e0_16, 0.e0_16]
-    identity(2,:) = [0.e0_16, 1.e0_16, 0.e0_16]
-    identity(3,:) = [0.e0_16, 0.e0_16, 1.e0_16]
+    l1 = sqrt(dot_product(point1-point2, point1-point2))
+    l2 = sqrt(dot_product(point1, point1))
+    l3 = sqrt(dot_product(point2, point2))
 
-    uxu(1,:) = [axis(1)*axis(1), axis(1)*axis(2), axis(1)*axis(3)]
-    uxu(2,:) = [axis(2)*axis(1), axis(2)*axis(2), axis(2)*axis(3)]
-    uxu(3,:) = [axis(3)*axis(1), axis(3)*axis(2), axis(3)*axis(3)]
-
-    skew_u(1,:) = [ 0.e0_16, -axis(3),  axis(2)]
-    skew_u(2,:) = [ axis(3),  0.e0_16, -axis(2)]
-    skew_u(3,:) = [-axis(2),  axis(1),  0.e0_16]
-
-    rotation = cos(angle/2.e0_16)*identity + &
-             & (1.e0_16 - sin(angle/2.e0_16))*uxu + &
-             & sin(angle/2.e0_16)*skew_u
-
-    lattice = lattice - spread(pivot, dim=1, ncopies=size(lattice,1))
-    do i=1, size(lattice,1)
-        lattice(i,:) = matmul(rotation,lattice(i,:))
-    enddo
-    lattice = lattice + spread(pivot, dim=1, ncopies=size(lattice,1))
-end subroutine
-
-subroutine sym_operation(index, lattice, pivot)
-    real*16, dimension(:,:), intent(inout)  :: lattice
-    real*16, dimension(3), intent(in)       :: pivot
-    integer, intent(in)                     :: index
-    real*16                                 :: rot_angle
-    integer                                 :: axis
-
-    ! TABLE OF CORRESPONDENCE OF INDEXES TO SYM. OP.
-    !  1 --> E
-    !  2 --> C6_1
-    !  3 --> C6_2
-    !  4 --> C3_1
-    !  5 --> C3_2
-    !  6 --> C2
-    !  7 --> C'2_1
-    !  8 --> C'2_2
-    !  9 --> C'2_3
-    ! 10 --> C''2_1
-    ! 11 --> C''2_2
-    ! 12 --> C''2_3
-
-    select case (index)
-        case(1) ! E
-            rot_angle = 0.e0_16
-            axis = 1
-        case(2) ! C6_1
-            rot_angle = pi/3.e0_16
-            axis = 3
-        case(3) ! C6_2
-            rot_angle = (5.e0_16*pi)/3.e0_16
-            axis = 3
-        case(4) ! C3_1
-            rot_angle = (2.e0_16*pi)/3.e0_16
-            axis = 3
-        case(5) ! C3_2
-            rot_angle = (4.e0_16*pi)/3.e0_16
-            axis = 3
-        case(6) ! C2
-            rot_angle = pi
-            axis = 3
-        case(7) ! C'2_1
-            rot_angle = pi
-            axis = 1
-        case(8) ! C'2_2 FIX AXIS TO USE THIS
-            rot_angle = 0.e0_16
-            axis = 1
-        case(9) ! C'2_3 FIX AXIS TO USE THIS
-            rot_angle = 0.e0_16
-            axis = 1
-        case(10) ! C''2_1 FIX AXIS TO USE THIS
-            rot_angle = 0.e0_16
-            axis = 1
-        case(11) ! C''2_2
-            rot_angle = pi
-            axis = 2
-        case(12) ! C''2_3 FIX AXIS TO USE THIS
-            rot_angle = 0.e0_16
-            axis = 1
-    end select
-
-    call rotate_lattice(lattice, rot_angle, pivot, axis)
-end subroutine
+    angle = acos((l2**2 + l3**2 - l1**2)/(2.e0_16*l2*l3))
+end function
 
 end module
