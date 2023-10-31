@@ -2,7 +2,7 @@ module hex_utils
 implicit none
 
 real(kind=8), parameter, public :: pi = 4.d0*atan(1.d0)
-real(kind=8), parameter, public :: tol = 1.d-2
+real(kind=8), parameter, public :: tol = 6.d-3
 
 contains
 
@@ -11,22 +11,6 @@ function magic_angle(ind) result(angle)
     real(kind=8)        :: angle
 
     angle = acos((real(3*ind*ind + 3*ind, 16) + 0.5d0)/real(3*ind*ind + 3*ind + 1, 16))
-end function
-
-function exists_in_lattice_old(point, lattice) result(flag)
-    real(kind=8), dimension(3), intent(in)      :: point
-    real(kind=8), dimension(:,:), intent(in)    :: lattice
-    logical                                     :: flag
-    real(kind=8), dimension(3)                  :: vec1
-    logical, dimension(:), allocatable          :: condition_list
-    integer                                     :: i
-
-    allocate(condition_list(size(lattice,1)))
-    do i=1, size(lattice, 1)
-        vec1 = abs(lattice(i,:) - point)
-        condition_list(i) = all(vec1 .lt. tol)
-    enddo
-    flag = any(condition_list .eqv. .true.)
 end function
 
 function exists_in_lattice(point, lattice) result(flag)

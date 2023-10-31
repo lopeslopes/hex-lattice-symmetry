@@ -78,39 +78,10 @@ try:
 except:
     print("No AB or BA points found")
 
-# try:
-#     with open(file="latticeOA.dat") as f:
-#         dataOVA = f.readlines()
-# 
-#     pointsOVA = []
-#     for line in dataOVA:
-#         aux = line.split(";")
-#         pointsOVA.append([float(aux[0]), float(aux[1]), float(aux[2])])
-#     pointsOVA = np.array(pointsOVA)
-#     axOVA = plt.subplot(111)
-#     grafOVA = axOVA.scatter(pointsOVA[:,0], pointsOVA[:,1], s=20, color="green")
-# except:
-#     print("No overlap close enough")
-# 
-# 
-# try:
-#     with open(file="latticeOB.dat") as f:
-#         dataOVB = f.readlines()
-# 
-#     pointsOVB = []
-#     for line in dataOVB:
-#         aux = line.split(";")
-#         pointsOVB.append([float(aux[0]), float(aux[1]), float(aux[2])])
-#     pointsOVB = np.array(pointsOVB)
-#     axOVB = plt.subplot(111)
-#     grafOVB = axOVB.scatter(pointsOVB[:,0], pointsOVB[:,1], s=20, color="red")
-# except:
-#     print("No overlap close enough")
-
 axA1.set_aspect(1)
 axB1.set_aspect(1)
-# axA2.set_aspect(1)
-# axB2.set_aspect(1)
+axA2.set_aspect(1)
+axB2.set_aspect(1)
 
 plt.legend(["A1", "B1", "A2", "B2", "AA", "AB"])
 plt.show()
