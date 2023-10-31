@@ -39,22 +39,78 @@ pointsB2 = np.array(pointsB2)
 
 # 2D PLOT (FASTER)
 axA1 = plt.subplot(111)
-grafA1 = axA1.scatter(pointsA1[:,0], pointsA1[:,1], s=30)
+grafA1 = axA1.scatter(pointsA1[:,0], pointsA1[:,1], s=30, color="blue")
 
 axB1 = plt.subplot(111)
-grafB1 = axB1.scatter(pointsB1[:,0], pointsB1[:,1], s=30)
+grafB1 = axB1.scatter(pointsB1[:,0], pointsB1[:,1], s=30, color="blue")
 
 axA2 = plt.subplot(111)
-grafA2 = axA2.scatter(pointsA2[:,0], pointsA2[:,1], s=10)
+grafA2 = axA2.scatter(pointsA2[:,0], pointsA2[:,1], s=30, color="orange")
 
 axB2 = plt.subplot(111)
-grafB2 = axB2.scatter(pointsB2[:,0], pointsB2[:,1], s=10)
+grafB2 = axB2.scatter(pointsB2[:,0], pointsB2[:,1], s=30, color="orange")
+
+try:
+    with open(file="latticeAA.dat") as f:
+        dataAA = f.readlines()
+
+    pointsAA = []
+    for line in dataAA:
+        aux = line.split(";")
+        pointsAA.append([float(aux[0]), float(aux[1]), float(aux[2])])
+    pointsAA = np.array(pointsAA)
+    axAA = plt.subplot(111)
+    grafAA = axAA.scatter(pointsAA[:,0], pointsAA[:,1], s=20, color="red")
+except:
+    print("No AA or BB points found")
+
+try:
+    with open(file="latticeAB.dat") as f:
+        dataAB = f.readlines()
+
+    pointsAB = []
+    for line in dataAB:
+        aux = line.split(";")
+        pointsAB.append([float(aux[0]), float(aux[1]), float(aux[2])])
+    pointsAB = np.array(pointsAB)
+    axAB = plt.subplot(111)
+    grafAB = axAB.scatter(pointsAB[:,0], pointsAB[:,1], s=20, color="green")
+except:
+    print("No AB or BA points found")
+
+# try:
+#     with open(file="latticeOA.dat") as f:
+#         dataOVA = f.readlines()
+# 
+#     pointsOVA = []
+#     for line in dataOVA:
+#         aux = line.split(";")
+#         pointsOVA.append([float(aux[0]), float(aux[1]), float(aux[2])])
+#     pointsOVA = np.array(pointsOVA)
+#     axOVA = plt.subplot(111)
+#     grafOVA = axOVA.scatter(pointsOVA[:,0], pointsOVA[:,1], s=20, color="green")
+# except:
+#     print("No overlap close enough")
+# 
+# 
+# try:
+#     with open(file="latticeOB.dat") as f:
+#         dataOVB = f.readlines()
+# 
+#     pointsOVB = []
+#     for line in dataOVB:
+#         aux = line.split(";")
+#         pointsOVB.append([float(aux[0]), float(aux[1]), float(aux[2])])
+#     pointsOVB = np.array(pointsOVB)
+#     axOVB = plt.subplot(111)
+#     grafOVB = axOVB.scatter(pointsOVB[:,0], pointsOVB[:,1], s=20, color="red")
+# except:
+#     print("No overlap close enough")
 
 axA1.set_aspect(1)
 axB1.set_aspect(1)
-axA2.set_aspect(1)
-axB2.set_aspect(1)
+# axA2.set_aspect(1)
+# axB2.set_aspect(1)
 
-plt.legend(['A1', 'B1', 'A2', 'B2'])
-
+plt.legend(["A1", "B1", "A2", "B2", "AA", "AB"])
 plt.show()
