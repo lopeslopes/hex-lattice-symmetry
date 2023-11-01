@@ -1,8 +1,9 @@
 module hex_utils
 implicit none
 
-real(kind=8), parameter, public :: pi = 4.d0*atan(1.d0)
-real(kind=8), parameter, public :: tol = 6.d-3
+real(kind=8), parameter, public :: pi   = 4.d0*atan(1.d0)
+real(kind=8), parameter, public :: tol  = 5.d-3
+real(kind=8), parameter, public :: tol2 = 5.d-3
 
 contains
 
@@ -11,16 +12,6 @@ function magic_angle(ind) result(angle)
     real(kind=8)        :: angle
 
     angle = acos((real(3*ind*ind + 3*ind, 16) + 0.5d0)/real(3*ind*ind + 3*ind + 1, 16))
-end function
-
-function exists_in_lattice(point, lattice) result(flag)
-    real(kind=8), dimension(3), intent(in)      :: point
-    real(kind=8), dimension(:,:), intent(in)    :: lattice
-    logical                                     :: flag
-    real(kind=8), dimension(size(lattice, 1), 3) :: vec1
-
-    vec1 = abs(lattice - spread(point, dim=1, ncopies=size(lattice,1)))
-    flag = any(all(vec1 .lt. tol, dim=2))
 end function
 
 subroutine create_honeycomb_lattice(latticeA, latticeB, z, a, ab_stacking)

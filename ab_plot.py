@@ -62,7 +62,7 @@ try:
     axAA = plt.subplot(111)
     grafAA = axAA.scatter(pointsAA[:,0], pointsAA[:,1], s=20, color="red")
 except:
-    print("No AA or BB points found")
+    print("No AA points found")
 
 try:
     with open(file="latticeAB.dat") as f:
@@ -76,12 +76,40 @@ try:
     axAB = plt.subplot(111)
     grafAB = axAB.scatter(pointsAB[:,0], pointsAB[:,1], s=20, color="green")
 except:
-    print("No AB or BA points found")
+    print("No AB points found")
+
+try:
+    with open(file="latticeBA.dat") as f:
+        dataBA = f.readlines()
+
+    pointsBA = []
+    for line in dataBA:
+        aux = line.split(";")
+        pointsBA.append([float(aux[0]), float(aux[1]), float(aux[2])])
+    pointsBA = np.array(pointsBA)
+    axBA = plt.subplot(111)
+    grafBA = axBA.scatter(pointsBA[:,0], pointsBA[:,1], s=20, color="purple")
+except:
+    print("No BA points found")
+
+try:
+    with open(file="latticeBB.dat") as f:
+        dataBB = f.readlines()
+
+    pointsBB = []
+    for line in dataBB:
+        aux = line.split(";")
+        pointsBB.append([float(aux[0]), float(aux[1]), float(aux[2])])
+    pointsBB = np.array(pointsBB)
+    axBB = plt.subplot(111)
+    grafBB = axBB.scatter(pointsBB[:,0], pointsBB[:,1], s=20, color="yellow")
+except:
+    print("No BB points found")
 
 axA1.set_aspect(1)
 axB1.set_aspect(1)
 axA2.set_aspect(1)
 axB2.set_aspect(1)
 
-plt.legend(["A1", "B1", "A2", "B2", "AA", "AB"])
+plt.legend(["A1", "B1", "A2", "B2", "AA", "AB", "BA", "BB"])
 plt.show()
