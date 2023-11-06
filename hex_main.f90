@@ -152,8 +152,7 @@ condAB = .false.
 condBA = .false.
 condBB = .false.
 
-!$omp parallel do default(none) private(i, n) &
-!$omp shared(pA, pB, latA2, latB2, latA1, latB1, condAB, condBA, condAA, condBB)
+!omp parallel do private(n) lastprivate(i) shared(pA, pB, latA2, latB2, latA1, latB1, condAB, condBA, condAA, condBB)
 do i=1, n/2
     pA = spread([latA2(i,1),latA2(i,2),0.d0], dim=1, ncopies=n/2)
     pB = spread([latB2(i,1),latB2(i,2),0.d0], dim=1, ncopies=n/2)
@@ -162,53 +161,55 @@ do i=1, n/2
     condAA(i) = any(all(abs(latA1 - pA) .lt. tol2, dim=2))
     condBB(i) = any(all(abs(latB1 - pB) .lt. tol2, dim=2))
 enddo
-!$omp end parallel do
+!omp end parallel do
 
-!do i=1, n/2
-!    if (condAB(i)) then
-!        j = j + 1
-!        lat_AB_aux(j,:) = latB2(i,:)
-!    endif
-!    if (condBA(i)) then
-!        k = k + 1
-!        lat_BA_aux(k,:) = latA2(i,:)
-!    endif
-!    if (condAA(i)) then
-!        l = l + 1
-!        lat_AA_aux(l,:) = latA2(i,:)
-!    endif
-!    if (condBB(i)) then
-!        m = m + 1
-!        lat_BB_aux(m,:) = latB2(i,:)
-!    endif
-!enddo
-!
-!!deallocate(pA, pB)
-!
-!allocate(latAB(j,3))
-!allocate(latBA(k,3))
-!allocate(latAA(l,3))
-!allocate(latBB(m,3))
-!latAA = lat_AA_aux(1:l,:)
-!latAB = lat_AB_aux(1:j,:)
-!latBA = lat_BA_aux(1:k,:)
-!latBB = lat_BB_aux(1:m,:)
-!deallocate(lat_AB_aux, lat_AA_aux, lat_BA_aux, lat_BB_aux)
-!
-!! WRITE LATTICES TO FILE
-!call write_lattice(latAA, "latticeAA.dat")
-!call write_lattice(latAB, "latticeAB.dat")
-!call write_lattice(latBA, "latticeBA.dat")
-!call write_lattice(latBB, "latticeBB.dat")
-!
-!! DEALLOCATE
-!deallocate(latA1, latB1, latA2, latB2)
-!deallocate(latAA, latAB, latBA, latBB)
+!write(*,*) condAA
 
-j = count(condAB .eqv. .true.)
-k = count(condBA .eqv. .true.)
-l = count(condAA .eqv. .true.)
-m = count(condBB .eqv. .true.)
+do i=1, n/2
+    if (condAB(i)) then
+        j = j + 1
+        lat_AB_aux(j,:) = latB2(i,:)
+    endif
+    if (condBA(i)) then
+        k = k + 1
+        lat_BA_aux(k,:) = latA2(i,:)
+    endif
+    if (condAA(i)) then
+        l = l + 1
+        lat_AA_aux(l,:) = latA2(i,:)
+    endif
+    if (condBB(i)) then
+        m = m + 1
+        lat_BB_aux(m,:) = latB2(i,:)
+    endif
+enddo
+
+!deallocate(pA, pB)
+
+allocate(latAB(j,3))
+allocate(latBA(k,3))
+allocate(latAA(l,3))
+allocate(latBB(m,3))
+latAA = lat_AA_aux(1:l,:)
+latAB = lat_AB_aux(1:j,:)
+latBA = lat_BA_aux(1:k,:)
+latBB = lat_BB_aux(1:m,:)
+deallocate(lat_AB_aux, lat_AA_aux, lat_BA_aux, lat_BB_aux)
+
+! WRITE LATTICES TO FILE
+call write_lattice(latAA, "latticeAA.dat")
+call write_lattice(latAB, "latticeAB.dat")
+call write_lattice(latBA, "latticeBA.dat")
+call write_lattice(latBB, "latticeBB.dat")
+
+! DEALLOCATE
+deallocate(latA1, latB1, latA2, latB2)
+deallocate(latAA, latAB, latBA, latBB)
+
+!j = count(condAB .eqv. .true.)
+!k = count(condBA .eqv. .true.)
+!l = count(condAA .eqv. .true.)
+!m = count(condBB .eqv. .true.)
 
 write(*,*) "  Number of AB points: ", j
 write(*,*) "  Number of BA points: ", k
