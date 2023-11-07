@@ -12,7 +12,7 @@ logical, dimension(:), allocatable          :: condAB, condBA, condAA, condBB
 logical                                     :: AB_stacking, hex_center_pivot, q1a, q1b
 
 ! INITIAL DEFINITIONS
-n = 200000
+n = 2500000
 a = 2.46d0
 z = 3.35d0
 hex_center_pivot = .false.
@@ -80,7 +80,7 @@ condAB = .false.
 condBA = .false.
 condBB = .false.
 
-!$omp parallel do private(i) shared(latA1, latB1, latA2, latB2) num_threads(3)
+!$omp parallel do private(i) shared(latA1, latB1, latA2, latB2) num_threads(4)
 do i=1, n/2
     condAB(i) = any(all(abs(latA1 - spread([latB2(i,1),latB2(i,2),0.d0], dim=1, ncopies=n/2)) .lt. tol2, dim=2))
     condBA(i) = any(all(abs(latB1 - spread([latA2(i,1),latA2(i,2),0.d0], dim=1, ncopies=n/2)) .lt. tol2, dim=2))
