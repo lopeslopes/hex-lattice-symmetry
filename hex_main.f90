@@ -5,7 +5,6 @@ implicit none
 real(kind=8), dimension(:,:), allocatable   :: latA1, latA2, latB1, latB2
 real(kind=8), dimension(:,:), allocatable   :: latAA, latAB, lat_AA_aux, lat_AB_aux
 real(kind=8), dimension(:,:), allocatable   :: latBB, latBA, lat_BB_aux, lat_BA_aux
-real(kind=8), dimension(:,:), allocatable   :: pA, pB
 real(kind=8), dimension(3)                  :: d1, origin1, origin2
 real(kind=8)                                :: angle, z, a, d, diff, min_diff, min_angle
 integer                                     :: i, j, k, l, m, n, i1, j1, k1, l1
@@ -13,7 +12,7 @@ logical, dimension(:), allocatable          :: condAB, condBA, condAA, condBB
 logical                                     :: AB_stacking, hex_center_pivot, q1a, q1b
 
 ! INITIAL DEFINITIONS
-n = 100000
+n = 200000
 a = 2.46d0
 z = 3.35d0
 hex_center_pivot = .false.
@@ -71,9 +70,7 @@ k = 0
 l = 0
 m = 0
 
-! CHECKING EXISTENCE IN LATTICE - NEW VERSION IS FASTER MINIMIZING FUNCTION CALLS
-allocate(pA(n/2,3))
-allocate(pB(n/2,3))
+! CHECKING EXISTENCE IN LATTICE USING OPENMP
 allocate(condAA(n/2))
 allocate(condAB(n/2))
 allocate(condBA(n/2))
@@ -83,18 +80,14 @@ condAB = .false.
 condBA = .false.
 condBB = .false.
 
-!omp parallel
-!omp do private(i) schedule(static)
-do concurrent (i=1:n/2)
-    pA = spread([latA2(i,1),latA2(i,2),0.d0], dim=1, ncopies=n/2)
-    pB = spread([latB2(i,1),latB2(i,2),0.d0], dim=1, ncopies=n/2)
-    condAB(i) = any(all(abs(latA1 - pB) .lt. tol2, dim=2))
-    condBA(i) = any(all(abs(latB1 - pA) .lt. tol2, dim=2))
-    condAA(i) = any(all(abs(latA1 - pA) .lt. tol2, dim=2))
-    condBB(i) = any(all(abs(latB1 - pB) .lt. tol2, dim=2))
+!$omp parallel do private(i) shared(latA1, latB1, latA2, latB2) num_threads(3)
+do i=1, n/2
+    condAB(i) = any(all(abs(latA1 - spread([latB2(i,1),latB2(i,2),0.d0], dim=1, ncopies=n/2)) .lt. tol2, dim=2))
+    condBA(i) = any(all(abs(latB1 - spread([latA2(i,1),latA2(i,2),0.d0], dim=1, ncopies=n/2)) .lt. tol2, dim=2))
+    condAA(i) = any(all(abs(latA1 - spread([latA2(i,1),latA2(i,2),0.d0], dim=1, ncopies=n/2)) .lt. tol2, dim=2))
+    condBB(i) = any(all(abs(latB1 - spread([latB2(i,1),latB2(i,2),0.d0], dim=1, ncopies=n/2)) .lt. tol2, dim=2))
 enddo
-!omp end do nowait
-!omp end parallel
+!$omp end parallel do
 
 do i=1, n/2
     if (condAB(i)) then
