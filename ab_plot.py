@@ -7,7 +7,7 @@ with open(file="latticeA1.dat") as f:
 pointsA1 = []
 for line in dataA1:
     aux = line.split(";")
-    pointsA1.append([float(aux[0]), float(aux[1]), float(aux[2])])
+    pointsA1.append([float(aux[0]), float(aux[1])])
 pointsA1 = np.array(pointsA1)
 
 with open(file="latticeB1.dat") as f:
@@ -16,7 +16,7 @@ with open(file="latticeB1.dat") as f:
 pointsB1 = []
 for line in dataB1:
     aux = line.split(";")
-    pointsB1.append([float(aux[0]), float(aux[1]), float(aux[2])])
+    pointsB1.append([float(aux[0]), float(aux[1])])
 pointsB1 = np.array(pointsB1)
 
 with open(file="latticeA2.dat") as f:
@@ -25,7 +25,7 @@ with open(file="latticeA2.dat") as f:
 pointsA2 = []
 for line in dataA2:
     aux = line.split(";")
-    pointsA2.append([float(aux[0]), float(aux[1]), float(aux[2])])
+    pointsA2.append([float(aux[0]), float(aux[1])])
 pointsA2 = np.array(pointsA2)
 
 with open(file="latticeB2.dat") as f:
@@ -34,7 +34,7 @@ with open(file="latticeB2.dat") as f:
 pointsB2 = []
 for line in dataB2:
     aux = line.split(";")
-    pointsB2.append([float(aux[0]), float(aux[1]), float(aux[2])])
+    pointsB2.append([float(aux[0]), float(aux[1])])
 pointsB2 = np.array(pointsB2)
 
 # 2D PLOT (FASTER)
@@ -57,7 +57,7 @@ try:
     pointsAA = []
     for line in dataAA:
         aux = line.split(";")
-        pointsAA.append([float(aux[0]), float(aux[1]), float(aux[2])])
+        pointsAA.append([float(aux[0]), float(aux[1])])
     pointsAA = np.array(pointsAA)
     axAA = plt.subplot(111)
     grafAA = axAA.scatter(pointsAA[:,0], pointsAA[:,1], s=20, color="red")
@@ -71,7 +71,7 @@ try:
     pointsAB = []
     for line in dataAB:
         aux = line.split(";")
-        pointsAB.append([float(aux[0]), float(aux[1]), float(aux[2])])
+        pointsAB.append([float(aux[0]), float(aux[1])])
     pointsAB = np.array(pointsAB)
     axAB = plt.subplot(111)
     grafAB = axAB.scatter(pointsAB[:,0], pointsAB[:,1], s=20, color="green")
@@ -85,7 +85,7 @@ try:
     pointsBA = []
     for line in dataBA:
         aux = line.split(";")
-        pointsBA.append([float(aux[0]), float(aux[1]), float(aux[2])])
+        pointsBA.append([float(aux[0]), float(aux[1])])
     pointsBA = np.array(pointsBA)
     axBA = plt.subplot(111)
     grafBA = axBA.scatter(pointsBA[:,0], pointsBA[:,1], s=20, color="purple")
@@ -99,7 +99,7 @@ try:
     pointsBB = []
     for line in dataBB:
         aux = line.split(";")
-        pointsBB.append([float(aux[0]), float(aux[1]), float(aux[2])])
+        pointsBB.append([float(aux[0]), float(aux[1])])
     pointsBB = np.array(pointsBB)
     axBB = plt.subplot(111)
     grafBB = axBB.scatter(pointsBB[:,0], pointsBB[:,1], s=20, color="yellow")
