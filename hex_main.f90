@@ -2,19 +2,19 @@ program hex_lattices
 use hex_utils
 implicit none
 
-real(kind=8), dimension(:,:), allocatable   :: latA1, latA2, latB1, latB2
-real(kind=8), dimension(:,:), allocatable   :: latAA, latAB, lat_AA_aux, lat_AB_aux
-real(kind=8), dimension(:,:), allocatable   :: latBB, latBA, lat_BB_aux, lat_BA_aux
-real(kind=8), dimension(3)                  :: d1, origin1, origin2
-real(kind=8)                                :: angle, z, a, d, diff, min_diff, min_angle
-integer                                     :: i, j, k, l, m, n, i1, j1, k1, l1
-logical, dimension(:), allocatable          :: condAB, condBA, condAA, condBB
-logical                                     :: AB_stacking, hex_center_pivot, q1a, q1b
+real(kind=16), dimension(:,:), allocatable :: latA1, latA2, latB1, latB2
+real(kind=16), dimension(:,:), allocatable :: latAA, latAB, lat_AA_aux, lat_AB_aux
+real(kind=16), dimension(:,:), allocatable :: latBB, latBA, lat_BB_aux, lat_BA_aux
+real(kind=16), dimension(3)                :: d1, origin1, origin2
+real(kind=16)                              :: z, a, d, angle
+integer                                    :: i, j, k, l, m, n
+logical, dimension(:), allocatable         :: condAB, condBA, condAA, condBB
+logical                                    :: AB_stacking, hex_center_pivot
 
 ! INITIAL DEFINITIONS
-n = 2500000
-a = 2.46d0
-z = 3.35d0
+n = 1000000
+a = 2.46e0_16
+z = 3.35e0_16
 hex_center_pivot = .false.
 AB_stacking = .false.
 
@@ -27,14 +27,14 @@ endif
 
 if (hex_center_pivot) then
     write(*,*) "Pivot point: empty center of hexagonal cell"
-    d = sqrt((a**2)/(2.d0*(1.d0-cos(2.d0*pi/3.d0))))
-    d1 = [d*cos(pi/6.d0), d*sin(pi/6.d0), z]
-    origin1 = d1 - [0.d0, 0.d0, z]
+    d = sqrt((a**2)/(2.e0_16*(1.e0_16-cos(2.e0_16*pi/3.e0_16))))
+    d1 = [d*cos(pi/6.e0_16), d*sin(pi/6.e0_16), z]
+    origin1 = d1 - [0.e0_16, 0.e0_16, z]
     origin2 = d1
 else
     write(*,*) "Pivot point: node at origin"
-    origin1 = [0.d0, 0.d0, 0.d0]
-    origin2 = [0.d0, 0.d0,    z]
+    origin1 = [0.e0_16, 0.e0_16, 0.e0_16]
+    origin2 = [0.e0_16, 0.e0_16,    z]
 endif
 
 ! ALLOCATION OF LATTICES AND FIRST CREATION
@@ -44,16 +44,16 @@ allocate(latB1(n/2,3))
 allocate(latA2(n/2,3))
 allocate(latB2(n/2,3))
 
-call create_honeycomb_lattice(latA1, latB1, 0.d0, a,     .false.)
+call create_honeycomb_lattice(latA1, latB1, 0.e0_16, a,     .false.)
 call create_honeycomb_lattice(latA2, latB2,    z, a, AB_stacking)
 
-min_angle = 0.019166696333079717d0
-write(*,*) "Angle in radians: ", min_angle
-write(*,*) "Angle in degrees: ", (min_angle*180.d0)/pi
+angle = 1.91601993415282663305148436041635378e-2_16!0.019166696333079717e0_16
+write(*,*) "Angle in radians: ", angle
+write(*,*) "Angle in degrees: ", (angle*180.e0_16)/pi
 
 ! ROTATE SECOND LATTICE BY THE ANGLE
-call rotate_lattice(latA2, min_angle, origin2, 3)
-call rotate_lattice(latB2, min_angle, origin2, 3)
+call rotate_lattice(latA2, angle, origin2, 3)
+call rotate_lattice(latB2, angle, origin2, 3)
 call write_lattice(latA1, "latticeA1.dat")
 call write_lattice(latB1, "latticeB1.dat")
 call write_lattice(latA2, "latticeA2.dat")
@@ -80,12 +80,12 @@ condAB = .false.
 condBA = .false.
 condBB = .false.
 
-!$omp parallel do private(i) shared(latA1, latB1, latA2, latB2) num_threads(4)
+!$omp parallel do private(i) shared(latA1, latB1, latA2, latB2) num_threads(6)
 do i=1, n/2
-    condAB(i) = any(all(abs(latA1 - spread([latB2(i,1),latB2(i,2),0.d0], dim=1, ncopies=n/2)) .lt. tol2, dim=2))
-    condBA(i) = any(all(abs(latB1 - spread([latA2(i,1),latA2(i,2),0.d0], dim=1, ncopies=n/2)) .lt. tol2, dim=2))
-    condAA(i) = any(all(abs(latA1 - spread([latA2(i,1),latA2(i,2),0.d0], dim=1, ncopies=n/2)) .lt. tol2, dim=2))
-    condBB(i) = any(all(abs(latB1 - spread([latB2(i,1),latB2(i,2),0.d0], dim=1, ncopies=n/2)) .lt. tol2, dim=2))
+    condAB(i) = any(all(abs(latA1 - spread([latB2(i,1),latB2(i,2),0.e0_16], dim=1, ncopies=n/2)) .lt. tol2, dim=2))
+    condBA(i) = any(all(abs(latB1 - spread([latA2(i,1),latA2(i,2),0.e0_16], dim=1, ncopies=n/2)) .lt. tol2, dim=2))
+    condAA(i) = any(all(abs(latA1 - spread([latA2(i,1),latA2(i,2),0.e0_16], dim=1, ncopies=n/2)) .lt. tol2, dim=2))
+    condBB(i) = any(all(abs(latB1 - spread([latB2(i,1),latB2(i,2),0.e0_16], dim=1, ncopies=n/2)) .lt. tol2, dim=2))
 enddo
 !$omp end parallel do
 

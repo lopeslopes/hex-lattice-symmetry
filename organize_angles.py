@@ -11,4 +11,5 @@ angles_a = sorted(angles_a)
 
 for a in angles_a:
     a_dg = a*(180/np.pi)
-    if (a_dg < 1.2): print(a_dg, a)
+    if ((a_dg < 1.1) and (a_dg > 1.09)):
+        print(a_dg, a)
