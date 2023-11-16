@@ -97,22 +97,6 @@ subroutine distance_from_origin(lattice, origin, distances)
     enddo
 end subroutine
 
-! DEPRECATED
-function rotate_point(point, pivot, angle) result(new_point)
-    real(kind=16), dimension(2), intent(in) :: point
-    real(kind=16), intent(in)               :: angle
-    real(kind=16), dimension(2)             :: aux1, aux2
-    real(kind=16), dimension(2)             :: pivot, new_point
-    real(kind=16), dimension(2,2)           :: rot_matrix
-
-    rot_matrix(1,:) = [cos(angle), -sin(angle)]
-    rot_matrix(2,:) = [sin(angle),  cos(angle)]
-
-    aux1 = point - pivot
-    aux2 = matmul(rot_matrix, aux1)
-    new_point = aux2 + pivot
-end function
-
 subroutine rotate_lattice(lattice, angle, pivot)
     real(kind=16), dimension(:,:), intent(inout) :: lattice
     real(kind=16), intent(in)                    :: angle

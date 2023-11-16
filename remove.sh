@@ -1,4 +1,5 @@
 #!/bin/bash
 
-rm *.dat *.o *.mod *.out
+rm *.dat *.out
+rm src/*.o src/*.mod
 rm hex_main calc_angle
