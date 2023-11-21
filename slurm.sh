@@ -6,5 +6,5 @@
 #SBATCH --error=/data/slurm.err
 #SBATCH --time=12:00:00
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=6
+#SBATCH --cpus-per-task=16
 srun ./compile.sh --oversubscribe
