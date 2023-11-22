@@ -2,7 +2,7 @@ module hex_utils
 implicit none
 
 real(kind=16), parameter, public :: pi   = 4.e0_16*atan(1.e0_16)
-real(kind=16), parameter, public :: tol  = 9.e-3_16
+real(kind=16), parameter, public :: tol  = 1.e-3_16
 real(kind=16), parameter, public :: tol2 = 5.e-3_16
 
 contains

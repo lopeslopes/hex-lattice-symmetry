@@ -1,4 +1,4 @@
-program hex_lattices
+program calc_angle
 use hex_utils
 implicit none
 

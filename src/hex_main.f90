@@ -10,9 +10,10 @@ real(kind=16)                              :: a, d, angle
 integer                                    :: i, j, k, l, m, n, num_columns, range_lat
 logical, dimension(:), allocatable         :: condAB, condBA, condAA, condBB
 logical                                    :: AB_stacking, hex_center_pivot
+character(len=100)                         :: cli_arg
 
 ! INITIAL DEFINITIONS
-n = 4000000
+n = 2000000
 a = 2.46e0_16
 hex_center_pivot = .false.
 AB_stacking = .false.
@@ -46,7 +47,22 @@ allocate(latB2(n/2,2))
 call create_honeycomb_lattice(latA1, latB1, a,     .false.)
 call create_honeycomb_lattice(latA2, latB2, a, AB_stacking)
 
-angle = 1.91666963330783704217126326302819188e-2_16
+! TEST ANGLES OBTAINED USING calc_angle.f90
+! angles(1) = 1.90264929971534712693433092186275811e-2_16
+! angles(2) = 1.90403102830304951869456657448196344e-2_16
+! angles(3) = 1.90495757117080288768798873954979561e-2_16
+! angles(4) = 1.91235783233762423239743767417441124e-2_16
+! angles(5) = 1.91517084211538477391489120822979632e-2_16
+! angles(6) = 1.91756277374731560763308567863988621e-2_16
+
+if (command_argument_count() .eq. 0) then
+    ! ANGLE USED IN THE FIRST SIMULATIONS
+    angle = 1.91666963330783704217126326302819188e-2_16
+else
+    call get_command_argument(1,cli_arg)
+    read(cli_arg,*) angle
+endif
+
 write(*,*) "Angle in radians: ", angle
 write(*,*) "Angle in degrees: ", (angle*180.e0_16)/pi
 
