@@ -13,7 +13,7 @@ logical                                    :: AB_stacking, hex_center_pivot
 character(len=100)                         :: cli_arg
 
 ! INITIAL DEFINITIONS
-n = 2000000
+n = 10000000
 a = 2.46e0_16
 hex_center_pivot = .false.
 AB_stacking = .false.

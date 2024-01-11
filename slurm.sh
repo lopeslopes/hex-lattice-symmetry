@@ -2,9 +2,7 @@
 
 #SBATCH --nodes 1
 #SBATCH --job-name=hex_lattice
-#SBATCH --output=/data/slurm.out
-#SBATCH --error=/data/slurm.err
-#SBATCH --time=12:00:00
+#SBATCH --time=2-12
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=16
+#SBATCH --cpus-per-task=18
 srun ./compile.sh --oversubscribe

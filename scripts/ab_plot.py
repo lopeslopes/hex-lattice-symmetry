@@ -111,5 +111,5 @@ axB1.set_aspect(1)
 axA2.set_aspect(1)
 axB2.set_aspect(1)
 
-plt.legend(["AA", "AB", "BA", "BB"], loc="upper right")
+plt.legend(["A1", "B1", "A2", "B2", "AA", "AB", "BA", "BB"], loc="upper right")
 plt.show()

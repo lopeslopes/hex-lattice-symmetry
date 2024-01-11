@@ -12,7 +12,7 @@ integer                                      :: i, j, k, l, m, n, i1, j1, k1, l1
 logical                                      :: AB_stacking, hex_center_pivot, q1a, q1b
 
 ! INITIAL DEFINITIONS
-n = 1500000
+n = 8000000
 a = 2.46e0_16
 z = 3.35e0_16
 hex_center_pivot = .false.
