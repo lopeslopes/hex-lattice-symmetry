@@ -6,7 +6,7 @@ real(kind=16), dimension(:,:), allocatable :: latA1, latA2, latB1, latB2
 real(kind=16), dimension(:,:), allocatable :: latAA, latAB, lat_AA_aux, lat_AB_aux
 real(kind=16), dimension(:,:), allocatable :: latBB, latBA, lat_BB_aux, lat_BA_aux
 real(kind=16), dimension(2)                :: d1, origin1, origin2
-real(kind=16)                              :: a, d, angle
+real(kind=16)                              :: a, d, angle, tol2
 integer                                    :: i, j, k, l, m, n, num_columns, range_lat
 logical, dimension(:), allocatable         :: condAB, condBA, condAA, condBB
 logical                                    :: AB_stacking, hex_center_pivot
@@ -58,13 +58,17 @@ call create_honeycomb_lattice(latA2, latB2, a, AB_stacking)
 if (command_argument_count() .eq. 0) then
     ! ANGLE USED IN THE FIRST SIMULATIONS
     angle = 1.91666963330783704217126326302819188e-2_16
+    tol2 = 5.e-4_16
 else
     call get_command_argument(1,cli_arg)
     read(cli_arg,*) angle
+    call get_command_argument(2,cli_arg)
+    read(cli_arg,*) tol2
 endif
 
 write(*,*) "Angle in radians: ", angle
 write(*,*) "Angle in degrees: ", (angle*180.e0_16)/pi
+write(*,*) "Tolerance:        ", tol2
 
 ! ROTATE SECOND LATTICE BY THE ANGLE
 call rotate_lattice(latA2, angle, origin2)
