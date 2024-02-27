@@ -5,4 +5,4 @@
 #SBATCH --time=2-12
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=18
-srun ./compile.sh --oversubscribe
+srun ./tolerance.sh --oversubscribe

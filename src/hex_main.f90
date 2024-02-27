@@ -58,7 +58,7 @@ call create_honeycomb_lattice(latA2, latB2, a, AB_stacking)
 if (command_argument_count() .eq. 0) then
     ! ANGLE USED IN THE FIRST SIMULATIONS
     angle = 1.91666963330783704217126326302819188e-2_16
-    tol2 = 5.e-4_16
+    tol2 = 5.e-3_16
 else
     call get_command_argument(1,cli_arg)
     read(cli_arg,*) angle
@@ -103,7 +103,7 @@ num_columns = int(sqrt(real(n)))
 range_lat = 100*num_columns
 write(*,*) num_columns, range_lat
 
-!$omp parallel do private(i) shared(latA1, latB1, latA2, latB2) num_threads(16)
+!$omp parallel do private(i) shared(latA1, latB1, latA2, latB2) num_threads(8)
 do i=1, n/2
     if (i .le. range_lat) then
         condAB(i)=any(all(abs(latA1(1:i+range_lat,:)-spread(latB2(i,:),dim=1,ncopies=i+range_lat)).lt.tol2,dim=2))
