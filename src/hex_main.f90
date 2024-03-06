@@ -103,7 +103,7 @@ num_columns = int(sqrt(real(n)))
 range_lat = 100*num_columns
 write(*,*) num_columns, range_lat
 
-!$omp parallel do private(i) shared(latA1, latB1, latA2, latB2) num_threads(8)
+!$omp parallel do private(i) shared(latA1, latB1, latA2, latB2) num_threads(18)
 do i=1, n/2
     if (i .le. range_lat) then
         condAB(i)=any(all(abs(latA1(1:i+range_lat,:)-spread(latB2(i,:),dim=1,ncopies=i+range_lat)).lt.tol2,dim=2))
