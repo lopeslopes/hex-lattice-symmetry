@@ -43,59 +43,49 @@ try:
             a1.append([float(aux[0]), float(aux[1])])
         a1 = np.array(a1)
     
-    with open("latticeA2.dat") as f:
-        dados_a2 = f.readlines()
-        a2 = []
-        for d in dados_a2:
-            aux = d.strip().split(";")
-            a2.append([float(aux[0]), float(aux[1])])
-        a2 = np.array(a2)
-    
-    with open("latticeB1.dat") as f:
-        dados_b1 = f.readlines()
-        b1 = []
-        for d in dados_b1:
-            aux = d.strip().split(";")
-            b1.append([float(aux[0]), float(aux[1])])
-        b1 = np.array(b1)
-    
-    with open("latticeB2.dat") as f:
-        dados_b2 = f.readlines()
-        b2 = []
-        for d in dados_b2:
-            aux = d.strip().split(";")
-            b2.append([float(aux[0]), float(aux[1])])
-        b2 = np.array(b2)
+    # with open("latticeA2.dat") as f:
+    #     dados_a2 = f.readlines()
+    #     a2 = []
+    #     for d in dados_a2:
+    #         aux = d.strip().split(";")
+    #         a2.append([float(aux[0]), float(aux[1])])
+    #     a2 = np.array(a2)
+    # 
+    # with open("latticeB1.dat") as f:
+    #     dados_b1 = f.readlines()
+    #     b1 = []
+    #     for d in dados_b1:
+    #         aux = d.strip().split(";")
+    #         b1.append([float(aux[0]), float(aux[1])])
+    #     b1 = np.array(b1)
+    # 
+    # with open("latticeB2.dat") as f:
+    #     dados_b2 = f.readlines()
+    #     b2 = []
+    #     for d in dados_b2:
+    #         aux = d.strip().split(";")
+    #         b2.append([float(aux[0]), float(aux[1])])
+    #     b2 = np.array(b2)
 except:
     print("No files found for lattices A1, A2, B1 or B2")
 
-
-diff = ab[35]
-origin = aa[44]
+diff = ab[58]
+origin = aa[45]
 print(f"norm of depicted vector: {np.linalg.norm(diff)}")
 
-# creating new lattices adding the diff
-aa2 = aa + diff
-ab2 = ab + diff
-ba2 = ba + diff
-bb2 = bb + diff
+ind = np.argmin(np.linalg.norm(a1 - diff, axis=1))
+print(f"A1 point: {a1[ind]}")
+print(f"B2 point: {diff}")
 
 # plots
 ax1 = plt.subplot(111)
 ax1.scatter(aa[:,0],aa[:,1], color='blue')
 ax1.scatter(ab[:,0],ab[:,1], color='orange')
-# ax1.scatter(ba[:,0],ba[:,1], color='orange')
-# ax1.scatter(bb[:,0],bb[:,1], color='blue')
+ax1.scatter(ba[:,0],ba[:,1], color='orange')
+ax1.scatter(bb[:,0],bb[:,1], color='blue')
 ax1.set_aspect("equal")
 
 ax2 = plt.subplot(111)
 ax2.quiver(origin[0], origin[1], diff[0], diff[1], angles='xy', scale_units='xy', scale=1)
-
-# ax3 = plt.subplot(111)
-# ax3.scatter(aa2[:,0],aa2[:,1])
-# ax3.scatter(ab2[:,0],ab2[:,1])
-# ax3.scatter(ba2[:,0],ba2[:,1])
-# ax3.scatter(bb2[:,0],bb2[:,1])
-# ax3.set_aspect("equal")
 
 plt.show()
